@@ -310,6 +310,7 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	// Send response
