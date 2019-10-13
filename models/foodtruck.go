@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -46,8 +45,4 @@ func (foodTruck *FoodTruck) MarshalJSON() ([]byte, error) {
 		Hours:     hours,
 		Reviews:   reviews,
 	})
-}
-
-func FoodTruckHandler(w http.ResponseWriter, r *http.Request) {
-
 }

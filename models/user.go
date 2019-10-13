@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"net/http"
 
 	"github.com/google/uuid"
 )
@@ -48,8 +47,4 @@ func (user *User) MarshalJSON() ([]byte, error) {
 		Email:           user.Email,
 		OwnedFoodTrucks: ownedFoodTrucks,
 	})
-}
-
-func UserHandler(w http.ResponseWriter, r *http.Request) {
-
 }

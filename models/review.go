@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,8 +33,4 @@ func (review *Review) MarshalJSON() ([]byte, error) {
 		Rating:   review.Rating,
 		Date:     review.Date.String(),
 	})
-}
-
-func ReviewHandler(w http.ResponseWriter, r *http.Request) {
-
 }

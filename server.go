@@ -1,35 +1,35 @@
-package munchserver
+package main
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"munchserver/models"
+	"munchserver/routes"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	db     *mongo.Database
-	router *mux.Router
-)
-
 func main() {
 	// Setup http router
-	router = mux.NewRouter()
-	router.HandleFunc("/users", models.UserHandler)
-	router.HandleFunc("/foodtrucks", models.FoodTruckHandler)
-	router.HandleFunc("/reviews", models.ReviewHandler)
+	router := mux.NewRouter()
+	router.HandleFunc("/users", routes.GetUsersHandler).Methods("GET")
 
 	// Connect to MongoDB
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
 
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 
-	db = client.Database("munch")
+	db := client.Database("munch")
+
+	routes.Db = db
+	routes.Router = router
 
 	fmt.Println("Connected to MongoDB!")
+	log.Fatal(http.ListenAndServe(":80", router))
 }
