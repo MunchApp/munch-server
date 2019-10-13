@@ -18,11 +18,11 @@ type Review struct {
 }
 
 type JSONReview struct {
-	ID       string  `json:"_id"`
-	Reviewer string  `json:"reviewer"`
-	Comment  string  `json:"comment"`
-	Rating   float32 `json:"rating"`
-	Date     string  `json:"date"`
+	ID       string `json:"_id" bson:"_id"`
+	Reviewer string
+	Comment  string
+	Rating   float32
+	Date     string
 }
 
 // MarshalJSON encodes a review into JSON

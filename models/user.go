@@ -18,12 +18,12 @@ type User struct {
 }
 
 type JSONUser struct {
-	ID              string   `json:"_id"`
-	Name            string   `json:"name"`
-	Favorites       []string `json:"favorites"`
-	Reviews         []string `json:"reviews"`
-	Email           string   `json:"email"`
-	OwnedFoodTrucks []string `json:"ownedFoodTrucks"`
+	ID              string `json:"_id" bson:"_id"`
+	Name            string
+	Favorites       []string
+	Reviews         []string
+	Email           string
+	OwnedFoodTrucks []string
 }
 
 // MarshalJSON encodes a user into JSON

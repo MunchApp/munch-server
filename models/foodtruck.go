@@ -21,13 +21,13 @@ type FoodTruck struct {
 
 // JSONFoodTruck is a JSON encodable version of FoodTruck
 type JSONFoodTruck struct {
-	ID        string   `json:"_id"`
-	Name      string   `json:"name"`
-	Address   string   `json:"address"`
-	Owner     string   `json:"owner"`
-	AvgRating float32  `json:"avgRating"`
-	Hours     []string `json:"hours"`
-	Reviews   []string `json:"reviews"`
+	ID        string `json:"_id" bson:"_id"`
+	Name      string
+	Address   string
+	Owner     string
+	AvgRating float32
+	Hours     []string
+	Reviews   []string
 }
 
 // MarshalJSON encodes a food truck into JSON
