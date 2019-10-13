@@ -16,6 +16,8 @@ func main() {
 	// Setup http router
 	router := mux.NewRouter()
 	router.HandleFunc("/users", routes.GetUsersHandler).Methods("GET")
+	router.HandleFunc("/foodtrucks", routes.GetFoodTrucksHandler).Methods("GET")
+	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
