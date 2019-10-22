@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/graphql-go/graphql"
+
 	"github.com/google/uuid"
 )
 
@@ -38,7 +40,20 @@ type JSONUser struct {
 	OwnedFoodTrucks []string  `json:"ownedFoodTrucks" bson:"ownedFoodTrucks"`
 }
 
-func NewJSONUser(user User) JSONUser {
+// Defines gql fields for User
+func GQLUser() graphql.ObjectConfig {
+	userType := graphql.ObjectConfig{
+		Name: "userFields",
+		Fields: graphql.Fields{
+			"name":  &graphql.Field{Type: graphql.String},
+			"email": &graphql.Field{Type: graphql.String},
+		},
+	}
+	return userType
+}
+
+// MarshalJSON encodes a user into JSON
+func (user *User) MarshalJSON() ([]byte, error) {
 	favorites := make([]string, len(user.Favorites))
 	reviews := make([]string, len(user.Reviews))
 	ownedFoodTrucks := make([]string, len(user.OwnedFoodTrucks))
@@ -51,7 +66,7 @@ func NewJSONUser(user User) JSONUser {
 	for i, ownedFoodTruck := range user.OwnedFoodTrucks {
 		ownedFoodTrucks[i] = ownedFoodTruck.ID.String()
 	}
-	return JSONUser{
+	return json.Marshal(JSONUser{
 		ID:              user.ID.String(),
 		PasswordHash:    user.PasswordHash,
 		NameFirst:       user.NameFirst,
@@ -64,10 +79,5 @@ func NewJSONUser(user User) JSONUser {
 		Favorites:       favorites,
 		Reviews:         reviews,
 		OwnedFoodTrucks: ownedFoodTrucks,
-	}
-}
-
-// MarshalJSON encodes a user into JSON
-func (user User) MarshalJSON() ([]byte, error) {
-	return json.Marshal(NewJSONUser(user))
+	})
 }
