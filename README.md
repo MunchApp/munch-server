@@ -1,6 +1,6 @@
-#Munch Server
+# Munch Server
 
-##Installing Packages
+## Installing Packages
 ```
 go get github.com/gorilla/mux
 go get github.com/google/uuid

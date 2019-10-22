@@ -24,13 +24,17 @@ type JSONReview struct {
 	Date     string  `json:"date" bson:"date"`
 }
 
-// MarshalJSON encodes a review into JSON
-func (review *Review) MarshalJSON() ([]byte, error) {
-	return json.Marshal(JSONReview{
+func NewJSONReview(review Review) JSONReview {
+	return JSONReview{
 		ID:       review.ID.String(),
 		Reviewer: review.Reviewer.ID.String(),
 		Comment:  review.Comment,
 		Rating:   review.Rating,
 		Date:     review.Date.String(),
-	})
+	}
+}
+
+// MarshalJSON encodes a review into JSON
+func (review Review) MarshalJSON() ([]byte, error) {
+	return json.Marshal(NewJSONReview(review))
 }
