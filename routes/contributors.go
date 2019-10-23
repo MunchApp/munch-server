@@ -8,131 +8,124 @@ import (
 )
 
 type ContributorResponse struct {
-	login             string
-	id                int64
-	nodeid            string
-	avatarurl         string
-	gravatarid        string
-	url               string
-	htmlurl           string
-	followersurl      string
-	followingurl      string
-	gistsurl          string
-	starredurl        string
-	subscriptionsurl  string
-	organizationsurl  string
-	reposurl          string
-	eventsurl         string
-	receivedeventsurl string
-	typeresponse      string
-	siteadmin         bool
-	contributions     int
+	Username      string `json:"Login"`
+	Contributions int    `json:"contributions`
 }
 
-// [
-// 	{
-// 		"login": "kftang",
-// 		"id": 15274333,
-// 		"node_id": "MDQ6VXNlcjE1Mjc0MzMz",
-// 		"avatar_url": "https://avatars0.githubusercontent.com/u/15274333?v=4",
-// 		"gravatar_id": "",
-// 		"url": "https://api.github.com/users/kftang",
-// 		"html_url": "https://github.com/kftang",
-// 		"followers_url": "https://api.github.com/users/kftang/followers",
-// 		"following_url": "https://api.github.com/users/kftang/following{/other_user}",
-// 		"gists_url": "https://api.github.com/users/kftang/gists{/gist_id}",
-// 		"starred_url": "https://api.github.com/users/kftang/starred{/owner}{/repo}",
-// 		"subscriptions_url": "https://api.github.com/users/kftang/subscriptions",
-// 		"organizations_url": "https://api.github.com/users/kftang/orgs",
-// 		"repos_url": "https://api.github.com/users/kftang/repos",
-// 		"events_url": "https://api.github.com/users/kftang/events{/privacy}",
-// 		"received_events_url": "https://api.github.com/users/kftang/received_events",
-// 		"type": "User",
-// 		"site_admin": false,
-// 		"contributions": 11
-// 	  },
-// 	  {
-// 		"login": "Lmnorrell99",
-// 		"id": 31517170,
-// 		"node_id": "MDQ6VXNlcjMxNTE3MTcw",
-// 		"avatar_url": "https://avatars2.githubusercontent.com/u/31517170?v=4",
-// 		"gravatar_id": "",
-// 		"url": "https://api.github.com/users/Lmnorrell99",
-// 		"html_url": "https://github.com/Lmnorrell99",
-// 		"followers_url": "https://api.github.com/users/Lmnorrell99/followers",
-// 		"following_url": "https://api.github.com/users/Lmnorrell99/following{/other_user}",
-// 		"gists_url": "https://api.github.com/users/Lmnorrell99/gists{/gist_id}",
-// 		"starred_url": "https://api.github.com/users/Lmnorrell99/starred{/owner}{/repo}",
-// 		"subscriptions_url": "https://api.github.com/users/Lmnorrell99/subscriptions",
-// 		"organizations_url": "https://api.github.com/users/Lmnorrell99/orgs",
-// 		"repos_url": "https://api.github.com/users/Lmnorrell99/repos",
-// 		"events_url": "https://api.github.com/users/Lmnorrell99/events{/privacy}",
-// 		"received_events_url": "https://api.github.com/users/Lmnorrell99/received_events",
-// 		"type": "User",
-// 		"site_admin": false,
-// 		"contributions": 1
-// 	  }
-// 	]
-
 func GetContributorsHandler(w http.ResponseWriter, r *http.Request) {
+
+	//TODO: cache maybe?
+
+	///////////////////////////////////////
+	// GETTING CONTRIBUTIONS FROM SERVER //
+	///////////////////////////////////////
 
 	//get users from the HTTP link
 	resp, err := http.Get("https://api.github.com/repos/MunchApp/munchserver/contributors")
 	if err != nil {
-		//handle error
+		fmt.Println("error:", err)
 	}
 
+	//close the response
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
-	englishBody := string(body)
-	fmt.Println(englishBody)
+	//print english for terminal debug
+	// englishBody := string(body)
+	// fmt.Println(englishBody)
 
-	type ContributorResponseTwo struct {
-		Username string `json:"Login"`
-		// Id                 int
-		// Node_id            string
-		// Avatar_url         string
-		// Gravatar_id        string
-		// Url                string
-		// Html_url           string
-		// Followers_url      string
-		// Following_url      string
-		// Gists_url          string
-		// Starred_url        string
-		// Subscriptions_url  string
-		// Organizations_url  string
-		// Repos_url          string
-		// Events_url         string
-		// Receivedevents_url string
-		// Type_response      string 	`json:"type"`
-		// Site_admin         bool
-		Contributions int `json:"contributions`
-	}
-
-	var contributorresponses []ContributorResponseTwo
-	jsonErr := json.Unmarshal(body, &contributorresponses)
+	//Create an array and print the contents of the array
+	var contributorResponsesServer []ContributorResponse
+	jsonErr := json.Unmarshal(body, &contributorResponsesServer)
 	if jsonErr != nil {
 		fmt.Println("error:", err)
 	}
+	fmt.Printf("ContributorResponses : %+v", contributorResponsesServer)
 
-	fmt.Printf("ContributorResponses : %+v", contributorresponses)
+	//////////////////////////////////////////
+	// GETTING CONTRIBUTIONS FROM munch-app //
+	//////////////////////////////////////////
 
+	//get users from the HTTP link
+	respApp, errApp := http.Get("https://api.github.com/repos/MunchApp/munch-app/contributors")
+	if errApp != nil {
+		fmt.Println("error HEEHRHR:", err)
+	}
+
+	//close the response
+	defer respApp.Body.Close()
+	bodyApp, errApp := ioutil.ReadAll(respApp.Body)
+
+	//print english for terminal debug
+	englishBodyApp := string(bodyApp)
+	fmt.Println(englishBodyApp)
+
+	//Create an array and print the contents of the array
+	var contributorResponsesApp []ContributorResponse
+	jsonErrApp := json.Unmarshal(bodyApp, &contributorResponsesApp)
+	if jsonErrApp != nil {
+		fmt.Println("error:", err)
+	} else {
+		fmt.Printf("ContributorResponses : %+v", contributorResponsesApp)
+	}
+
+	//////////////////////////////////
+	// CREATING THE RETURN RESPONSE //
+	//////////////////////////////////
+
+	fmt.Println()
+	fmt.Println("TEST - printing: ", contributorResponsesApp[0])
+
+	yasira := newReturnResponse("yasirayounus", contributorResponsesServer, contributorResponsesApp)
+	var kenny = newReturnResponse("kftang", contributorResponsesServer, contributorResponsesApp)
+	var luke = newReturnResponse("Lmnorrell99", contributorResponsesServer, contributorResponsesApp)
+	var janine = newReturnResponse("janinebar", contributorResponsesServer, contributorResponsesApp)
+	var syed = newReturnResponse("majjalpee", contributorResponsesServer, contributorResponsesApp)
+	var rafael = newReturnResponse("RafaelHerrejon", contributorResponsesServer, contributorResponsesApp)
+	var andrea = newReturnResponse("ngynandrea", contributorResponsesServer, contributorResponsesApp)
+
+	var returnResponses [7]ContributorResponse
+
+	returnResponses[0] = *andrea
+	returnResponses[1] = *janine
+	returnResponses[2] = *kenny
+	returnResponses[3] = *luke
+	returnResponses[4] = *rafael
+	returnResponses[5] = *syed
+	returnResponses[6] = *yasira
+
+	fmt.Println()
+	fmt.Printf("returnResponses : %+v", returnResponses)
+
+	js, errJS := json.Marshal(returnResponses)
+	if errJS != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "Error in decoding mongo document: %v", err)
+		return
+	}
+	w.WriteHeader(200)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+	return
 }
 
-func GetContributors2Handler(w http.ResponseWriter, r *http.Request) {
-	var jsonBlob = []byte(`[
-	{"Name": "Platypus", "Order": "Monotremata"},
-	{"Name": "Quoll",    "Order": "Dasyuromorphia"}
-]`)
-	type Animal struct {
-		Name  string
-		Order string
+func newReturnResponse(username string, serverResponse []ContributorResponse, appResponse []ContributorResponse) *ContributorResponse {
+
+	r := ContributorResponse{Username: username}
+	r.Contributions = 0
+
+	for i := 0; i < len(serverResponse); i++ {
+		if serverResponse[i].Username == r.Username {
+			r.Contributions += serverResponse[i].Contributions
+		}
 	}
-	var animals []Animal
-	err := json.Unmarshal(jsonBlob, &animals)
-	if err != nil {
-		fmt.Println("error:", err)
+
+	for i := 0; i < len(appResponse); i++ {
+		if appResponse[i].Username == r.Username {
+			r.Contributions += appResponse[i].Contributions
+		}
 	}
-	fmt.Printf("%+v", animals)
+
+	return &r
+
 }
