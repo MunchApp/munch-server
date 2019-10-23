@@ -6,6 +6,7 @@ import (
 	"log"
 	"munchserver/routes"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,7 +21,11 @@ func main() {
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 
 	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
+	mongoURI, exists := os.LookupEnv("MONGODB_URI")
+	if !exists {
+		mongoURI = "mongodb://localhost:27017"
+	}
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
 
 	if err != nil {
 		log.Fatal(err)
