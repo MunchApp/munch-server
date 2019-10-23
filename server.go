@@ -37,6 +37,11 @@ func main() {
 	routes.Db = db
 	routes.Router = router
 
+	port, exists := os.LookupEnv("PORT")
+	if !exists {
+		port = "80"
+	}
+
 	fmt.Println("Connected to MongoDB!")
-	log.Fatal(http.ListenAndServe(":80", router))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
