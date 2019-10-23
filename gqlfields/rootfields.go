@@ -1,22 +1,22 @@
-package main
+package gqlfields
 
 import (
 	"context"
 	"fmt"
 	"log"
 	"munchserver/models"
+	"munchserver/routes"
 
 	"github.com/graphql-go/graphql"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Sub-queries underneath root query
-func getRootFields() graphql.Fields {
+func GetRootQueryFields() graphql.Fields {
 	fields := graphql.Fields{
+		// Get user info
 		"user": &graphql.Field{
-			Type: graphql.NewObject(models.GQLUser()),
+			Type: UserType,
 			Args: graphql.FieldConfigArgument{ //Can define specific user from here
 				"email": &graphql.ArgumentConfig{Type: graphql.String},
 			},
@@ -25,25 +25,15 @@ func getRootFields() graphql.Fields {
 				var user models.User
 
 				if ok {
-					// Connect to MongoDB
-					client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
-					if err != nil {
-						log.Fatal(err)
-					}
 
-					db := client.Database("munch")
-					userCollection := db.Collection("users")
+					userCollection := routes.Db.Collection("users")
 
 					// Get specific user from db
 					filter := bson.D{{"email", email}}
-					err = userCollection.FindOne(context.TODO(), filter).Decode(&user)
+					err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
 					fmt.Println("Found user: %v", user)
-
-					// Disconnect from MongoDB
-					err = client.Disconnect(context.TODO())
 					if err != nil {
 						log.Fatal(err)
-						return nil, nil
 					}
 
 					return user, nil

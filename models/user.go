@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/graphql-go/graphql"
-
 	"github.com/google/uuid"
 )
 
@@ -38,18 +36,6 @@ type JSONUser struct {
 	Favorites       []string  `json:"favorites" bson:"favorites"`
 	Reviews         []string  `json:"reviews" bson:"reviews"`
 	OwnedFoodTrucks []string  `json:"ownedFoodTrucks" bson:"ownedFoodTrucks"`
-}
-
-// Defines gql fields for User
-func GQLUser() graphql.ObjectConfig {
-	userType := graphql.ObjectConfig{
-		Name: "userFields",
-		Fields: graphql.Fields{
-			"name":  &graphql.Field{Type: graphql.String},
-			"email": &graphql.Field{Type: graphql.String},
-		},
-	}
-	return userType
 }
 
 // MarshalJSON encodes a user into JSON
