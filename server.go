@@ -18,6 +18,7 @@ func main() {
 	router.HandleFunc("/users", routes.GetUsersHandler).Methods("GET")
 	router.HandleFunc("/foodtrucks", routes.GetFoodTrucksHandler).Methods("GET")
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
+	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
