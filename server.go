@@ -4,12 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-<<<<<<< HEAD
-=======
-	"munchserver/gqlfields"
-	_ "munchserver/gqlfields"
-	_ "munchserver/models"
->>>>>>> working root query, finished mutation query code but not working
 	"munchserver/routes"
 	"net/http"
 	"os"
