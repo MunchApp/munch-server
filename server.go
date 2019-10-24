@@ -33,7 +33,12 @@ func main() {
 		return
 	}
 
-	db := client.Database("munch")
+	dbName, exists := os.LookupEnv("MONGODB_DBNAME")
+	if !exists {
+		dbName = "munch"
+	}
+
+	db := client.Database(dbName)
 
 	routes.Db = db
 	routes.Router = router
