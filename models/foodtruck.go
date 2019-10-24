@@ -9,28 +9,33 @@ import (
 
 // FoodTruck Model
 type FoodTruck struct {
-	ID        uuid.UUID
-	Name      string
-	Address   string
-	Owner     *User
-	AvgRating float32
-	Hours     [2]time.Time
-	Reviews   []*Review
+	ID          uuid.UUID
+	Name        string
+	Address     string
+	Owner       *User
+	AvgRating   float32
+	Hours       [2]time.Time
+	Reviews     []*Review
+	Photos      []string
+	Website     string
+	PhoneNumber string
 }
 
 // JSONFoodTruck is a JSON encodable version of FoodTruck
 type JSONFoodTruck struct {
-	ID        string   `json:"id" bson:"_id"`
-	Name      string   `json:"name" bson:"name"`
-	Address   string   `json:"address" bson:"address"`
-	Owner     string   `json:"owner" bson:"owner"`
-	AvgRating float32  `json:"avgRating" bson:"avgRating"`
-	Hours     []string `json:"hours" bson:"hours"`
-	Reviews   []string `json:"reviews" bson:"reviews"`
+	ID          string       `json:"id" bson:"_id"`
+	Name        string       `json:"name" bson:"name"`
+	Address     string       `json:"address" bson:"address"`
+	Owner       string       `json:"owner" bson:"owner"`
+	AvgRating   float32      `json:"avgRating" bson:"avgRating"`
+	Hours       [2]time.Time `json:"hours" bson:"hours"`
+	Reviews     []string     `json:"reviews" bson:"reviews"`
+	Photos      []string     `json:"photos" bson:"photos"`
+	Website     string       `json:"website" bson:"website"`
+	PhoneNumber string       `json:"phoneNumber" bson:"phoneNumber"`
 }
 
 func NewJSONFoodTruck(foodTruck FoodTruck) JSONFoodTruck {
-	hours := []string{foodTruck.Hours[0].String(), foodTruck.Hours[1].String()}
 	reviews := make([]string, len(foodTruck.Reviews))
 	for i, review := range foodTruck.Reviews {
 		reviews[i] = review.ID.String()
@@ -41,7 +46,7 @@ func NewJSONFoodTruck(foodTruck FoodTruck) JSONFoodTruck {
 		Address:   foodTruck.Address,
 		Owner:     foodTruck.Owner.ID.String(),
 		AvgRating: foodTruck.AvgRating,
-		Hours:     hours,
+		Hours:     foodTruck.Hours,
 		Reviews:   reviews,
 	}
 }
