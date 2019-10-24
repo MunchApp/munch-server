@@ -38,7 +38,7 @@ type JSONUser struct {
 	OwnedFoodTrucks []string  `json:"ownedFoodTrucks" bson:"ownedFoodTrucks"`
 }
 
-func NewJSONUser(user User) (*JSONUser, error) {
+func NewJSONUser(user User) JSONUser {
 	favorites := make([]string, len(user.Favorites))
 	reviews := make([]string, len(user.Reviews))
 	ownedFoodTrucks := make([]string, len(user.OwnedFoodTrucks))
@@ -51,7 +51,7 @@ func NewJSONUser(user User) (*JSONUser, error) {
 	for i, ownedFoodTruck := range user.OwnedFoodTrucks {
 		ownedFoodTrucks[i] = ownedFoodTruck.ID.String()
 	}
-	return &JSONUser{
+	return JSONUser{
 		ID:              user.ID.String(),
 		PasswordHash:    user.PasswordHash,
 		NameFirst:       user.NameFirst,
@@ -64,14 +64,10 @@ func NewJSONUser(user User) (*JSONUser, error) {
 		Favorites:       favorites,
 		Reviews:         reviews,
 		OwnedFoodTrucks: ownedFoodTrucks,
-	}, nil
+	}
 }
 
 // MarshalJSON encodes a user into JSON
 func (user User) MarshalJSON() ([]byte, error) {
-	jsonUser, err := NewJSONUser(user)
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(jsonUser)
+	return json.Marshal(NewJSONUser(user))
 }
