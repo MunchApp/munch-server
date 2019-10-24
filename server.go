@@ -22,6 +22,7 @@ func main() {
 	router.HandleFunc("/foodtrucks", routes.GetFoodTrucksHandler).Methods("GET")
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
+	router.HandleFunc("/graphql", routes.GetGraphQLHandler).Methods("GET")
 
 	// Connect to MongoDB
 	mongoURI, exists := os.LookupEnv("MONGODB_URI")

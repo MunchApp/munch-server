@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"munchserver/models"
-	"munchserver/routes"
 
 	"github.com/graphql-go/graphql"
 )
@@ -54,14 +53,14 @@ var MutationTypes = graphql.Fields{
 			if ok {
 
 				fmt.Println("--- in mutation ---")
-				collection := routes.Db.Collection("users")
+				collection := Db.Collection("users")
 
 				// Insert to MongoDB
 				// Sample user
 				user1 := models.JSONUser{"1", firstname, nil, nil, "devil@gmail.com", nil}
-				result, err2 := collection.InsertOne(context.TODO(), user1)
-				if err2 != nil {
-					log.Fatal("user1 input %v", err2)
+				result, err := collection.InsertOne(context.TODO(), user1)
+				if err != nil {
+					log.Fatal(err)
 				}
 				fmt.Println("Inserted a single doc:", result.InsertedID)
 

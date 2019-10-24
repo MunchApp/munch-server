@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"munchserver/models"
-	"munchserver/routes"
 
 	"github.com/graphql-go/graphql"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,12 +25,12 @@ func GetRootQueryFields() graphql.Fields {
 
 				if ok {
 
-					userCollection := routes.Db.Collection("users")
+					userCollection := Db.Collection("users")
 
 					// Get specific user from db
 					filter := bson.D{{"email", email}}
 					err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
-					fmt.Println("Found user: %v", user)
+					fmt.Printf("Found user: %v", user)
 					if err != nil {
 						log.Fatal(err)
 					}
