@@ -3,19 +3,27 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
 	"munchserver/models"
+	"munchserver/queries"
 	"net/http"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type registerUser struct {
+type loginRequest struct {
+	Email    *string `json:"email"`
+	Password *string `json:"password"`
+}
+
+type loginResponse struct {
+	Token string `json:"token"`
+}
+
+type registerRequest struct {
 	NameFirst   *string    `json:"firstName"`
 	NameLast    *string    `json:"lastName"`
 	Email       *string    `json:"email"`
@@ -23,10 +31,12 @@ type registerUser struct {
 	DateOfBirth *time.Time `json:"dateOfBirth"`
 }
 
-func PostUsersHandler(w http.ResponseWriter, r *http.Request) {
+// PostRegisterHandler handles the logic for registering a user
+func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse the user from the request body
 	userDecoder := json.NewDecoder(r.Body)
 	userDecoder.DisallowUnknownFields()
-	var newUser registerUser
+	var newUser registerRequest
 	err := userDecoder.Decode(&newUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -44,11 +54,14 @@ func PostUsersHandler(w http.ResponseWriter, r *http.Request) {
 	// Salt and hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*newUser.Password), bcrypt.DefaultCost)
 
+	// Generate a random uuidv4
 	uuid, err := uuid.NewRandom()
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
+	// Create user that is going to be added into the database
 	registeredUser := models.JSONUser{
 		ID:           uuid.String(),
 		PasswordHash: hashedPassword,
@@ -58,6 +71,8 @@ func PostUsersHandler(w http.ResponseWriter, r *http.Request) {
 		DateOfBirth:  *newUser.DateOfBirth,
 	}
 	_, err = Db.Collection("users").InsertOne(context.TODO(), registeredUser)
+
+	// If there is an error, it is most likely a duplicate user (email must be unique)
 	if err != nil {
 		w.WriteHeader(http.StatusConflict)
 		return
@@ -65,31 +80,55 @@ func PostUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
-	// Get all users from the database into a cursor
-	usersCollection := Db.Collection("users")
-	cur, err := usersCollection.Find(context.TODO(), bson.D{})
+// PostLoginHandler handles the logic for logging in
+func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
+	// Decode login user
+	userDecoder := json.NewDecoder(r.Body)
+	userDecoder.DisallowUnknownFields()
+	var login loginRequest
+	err := userDecoder.Decode(&login)
 	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error in database: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if login.Email == nil ||
+		login.Password == nil {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	// Get users from cursor, convert to empty slice if no users in DB
-	var users []models.JSONUser
-	cur.All(context.TODO(), &users)
-	if users == nil {
-		users = make([]models.JSONUser, 0)
-	}
-
-	// Convert users to json
-	js, err := json.Marshal(users)
+	var user models.JSONUser
+	userResult := Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(login.Email))
+	err = userResult.Decode(&user)
 	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error in decoding mongo document: %v", err)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	w.WriteHeader(200)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(*login.Password))
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	claims := jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	jwtString, err := token.SignedString([]byte("MunchIsReallyCool"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	resp, err := json.Marshal(loginResponse{
+		Token: jwtString,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
 }

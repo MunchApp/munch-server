@@ -17,8 +17,8 @@ import (
 func main() {
 	// Setup http router
 	router := mux.NewRouter()
-	router.HandleFunc("/users", routes.GetUsersHandler).Methods("GET")
-	router.HandleFunc("/users", routes.PostUsersHandler).Methods("POST")
+	router.HandleFunc("/register", routes.PostRegisterHandler).Methods("POST")
+	router.HandleFunc("/login", routes.PostLoginHandler).Methods("POST")
 	router.HandleFunc("/foodtrucks", routes.GetFoodTrucksHandler).Methods("GET")
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
