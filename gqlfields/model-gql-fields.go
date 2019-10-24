@@ -18,7 +18,31 @@ var foodTruckType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "foodTruckFields",
 	Fields: graphql.Fields{
 		"name":  &graphql.Field{Type: graphql.String},
-		"": &graphql.Field{Type: graphql.String},
-		"id":    &graphql.Field{Type: graphql.String},
+		"address": &graphql.Field{Type: graphql.String},
+		"avgRating": &graphql.Field{Type: graphql.Float},
+		"hours": &graphql.Field{Type: graphql.NewList(graphql.String)},
+		"reviews": &graphql.Field{Type: graphql.NewList(reviewType)},
 	},
 })
+
+// GQL Fields to RETURN for reviews
+var reviewType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "reviewFields",
+	Fields: graphql.Fields{
+		"id":  &graphql.Field{Type: graphql.String},
+		"reviewer": &graphql.Field{Type: graphql.String},              //maybe change to user type? Have to see how its done again
+		"comment": &graphql.Field{Type: graphql.String},
+		"rating": &graphql.Field{Type: graphql.Float},
+		"date": &graphql.Field{Type: graphql.String},
+	},
+})
+
+/*
+	ID       string  `json:"id" bson:"_id"`
+	Reviewer string  `json:"reviewer" bson:"reviewer"`
+	Comment  string  `json:"comment" bson:"comment"`
+	Rating   float32 `json:"rating" bson:"rating"`
+	Date     string  `json:"date" bson:"date"`
+*/
+
+
