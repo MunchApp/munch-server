@@ -4,11 +4,66 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"munchserver/models"
 	"net/http"
+	"time"
+
+	"github.com/google/uuid"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/crypto/bcrypt"
 )
+
+type registerUser struct {
+	NameFirst   *string    `json:"firstName"`
+	NameLast    *string    `json:"lastName"`
+	Email       *string    `json:"email"`
+	Password    *string    `json:"password"`
+	DateOfBirth *time.Time `json:"dateOfBirth"`
+}
+
+func PostUsersHandler(w http.ResponseWriter, r *http.Request) {
+	userDecoder := json.NewDecoder(r.Body)
+	userDecoder.DisallowUnknownFields()
+	var newUser registerUser
+	err := userDecoder.Decode(&newUser)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if newUser.NameFirst == nil ||
+		newUser.NameLast == nil ||
+		newUser.Email == nil ||
+		newUser.Password == nil ||
+		newUser.DateOfBirth == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Salt and hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*newUser.Password), bcrypt.DefaultCost)
+
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	registeredUser := models.JSONUser{
+		ID:           uuid.String(),
+		PasswordHash: hashedPassword,
+		NameFirst:    *newUser.NameFirst,
+		NameLast:     *newUser.NameLast,
+		Email:        *newUser.Email,
+		DateOfBirth:  *newUser.DateOfBirth,
+	}
+	_, err = Db.Collection("users").InsertOne(context.TODO(), registeredUser)
+	if err != nil {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
+}
 
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all users from the database into a cursor

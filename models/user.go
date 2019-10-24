@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -9,23 +10,35 @@ import (
 // User Model
 type User struct {
 	ID              uuid.UUID
-	Name            string
+	PasswordHash    []byte
+	NameFirst       string
+	NameLast        string
+	Email           string
+	PhoneNumber     string
+	City            string
+	State           string
+	DateOfBirth     time.Time
+	OwnedFoodTrucks []*FoodTruck
 	Favorites       []*FoodTruck
 	Reviews         []*Review
-	Email           string
-	OwnedFoodTrucks []*FoodTruck
 }
 
 type JSONUser struct {
-	ID              string   `json:"id" bson:"_id"`
-	Name            string   `json:"name" bson:"name"`
-	Favorites       []string `json:"favorites" bson:"favorites"`
-	Reviews         []string `json:"reviews" bson:"reviews"`
-	Email           string   `json:"email" bson:"email"`
-	OwnedFoodTrucks []string `json:"ownedFoodTrucks" bson:"ownedFoodTrucks"`
+	ID              string    `json:"id" bson:"_id"`
+	PasswordHash    []byte    `json:"passwordHash" bson:"passwordHash"`
+	NameFirst       string    `json:"firstName" bson:"firstName"`
+	NameLast        string    `json:"lastName" bson:"lastName"`
+	Email           string    `json:"email" bson:"email"`
+	PhoneNumber     string    `json:"phoneNumber" bson:"phoneNumber"`
+	City            string    `json:"city" bson:"city"`
+	State           string    `json:"state" bson:"state"`
+	DateOfBirth     time.Time `json:"dateOfBirth" bson:"dateOfBirth"`
+	Favorites       []string  `json:"favorites" bson:"favorites"`
+	Reviews         []string  `json:"reviews" bson:"reviews"`
+	OwnedFoodTrucks []string  `json:"ownedFoodTrucks" bson:"ownedFoodTrucks"`
 }
 
-func NewJSONUser(user User) JSONUser {
+func NewJSONUser(user User) (*JSONUser, error) {
 	favorites := make([]string, len(user.Favorites))
 	reviews := make([]string, len(user.Reviews))
 	ownedFoodTrucks := make([]string, len(user.OwnedFoodTrucks))
@@ -38,17 +51,27 @@ func NewJSONUser(user User) JSONUser {
 	for i, ownedFoodTruck := range user.OwnedFoodTrucks {
 		ownedFoodTrucks[i] = ownedFoodTruck.ID.String()
 	}
-	return JSONUser{
+	return &JSONUser{
 		ID:              user.ID.String(),
-		Name:            user.Name,
+		PasswordHash:    user.PasswordHash,
+		NameFirst:       user.NameFirst,
+		NameLast:        user.NameLast,
+		Email:           user.Email,
+		PhoneNumber:     user.PhoneNumber,
+		City:            user.City,
+		State:           user.State,
+		DateOfBirth:     user.DateOfBirth,
 		Favorites:       favorites,
 		Reviews:         reviews,
-		Email:           user.Email,
 		OwnedFoodTrucks: ownedFoodTrucks,
-	}
+	}, nil
 }
 
 // MarshalJSON encodes a user into JSON
 func (user User) MarshalJSON() ([]byte, error) {
-	return json.Marshal(NewJSONUser(user))
+	jsonUser, err := NewJSONUser(user)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(jsonUser)
 }
