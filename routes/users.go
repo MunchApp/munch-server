@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"munchserver/models"
 	"munchserver/queries"
 	"net/http"
@@ -59,6 +60,7 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate a random uuidv4
 	uuid, err := uuid.NewRandom()
 	if err != nil {
+		fmt.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -76,6 +78,7 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// If there is an error, it is most likely a duplicate user (email must be unique)
 	if err != nil {
+		fmt.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
@@ -126,6 +129,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	jwtString, err := token.SignedString([]byte("MunchIsReallyCool")) // TODO: Move the secret to an env var
 	if err != nil {
+		fmt.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -135,6 +139,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 		Token: jwtString,
 	})
 	if err != nil {
+		fmt.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
