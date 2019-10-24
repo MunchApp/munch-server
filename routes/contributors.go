@@ -182,8 +182,8 @@ func GetContributorsHandler(w http.ResponseWriter, r *http.Request) {
 	rafael.Issues += newIssueCount("RafaelHerrejon", contributorServerClosedIssues, contributorServerOpenIssues)
 
 	andrea := newReturnResponse("ngynandrea", contributorResponsesServer, contributorResponsesApp)
-	andrea.Issues = newIssueCount("ngynAndrea", contributorAppClosedIssues, contributorAppOpenIssues)
-	andrea.Issues += newIssueCount("ngynAndrea", contributorServerClosedIssues, contributorServerOpenIssues)
+	andrea.Issues = newIssueCount("ngynandrea", contributorAppClosedIssues, contributorAppOpenIssues)
+	andrea.Issues += newIssueCount("ngynandrea", contributorServerClosedIssues, contributorServerOpenIssues)
 
 	var returnResponses [7]ReturnResponse
 
