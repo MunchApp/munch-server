@@ -33,7 +33,7 @@ type registerRequest struct {
 
 // PostRegisterHandler handles the logic for registering a user
 func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
-	// Parse the user from the request body
+	// Decode registered user's data
 	userDecoder := json.NewDecoder(r.Body)
 	userDecoder.DisallowUnknownFields()
 	var newUser registerRequest
@@ -42,6 +42,8 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// Make sure all fields in registered user are provided
 	if newUser.NameFirst == nil ||
 		newUser.NameLast == nil ||
 		newUser.Email == nil ||
@@ -61,7 +63,7 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create user that is going to be added into the database
+	// Create and insert user into database
 	registeredUser := models.JSONUser{
 		ID:           uuid.String(),
 		PasswordHash: hashedPassword,
@@ -78,6 +80,8 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create the response
+	w.WriteHeader(http.StatusOK)
 }
 
 // PostLoginHandler handles the logic for logging in
@@ -91,12 +95,15 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// Make sure all fields in request are provided
 	if login.Email == nil ||
 		login.Password == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
+	// Find user in database
 	var user models.JSONUser
 	userResult := Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(login.Email))
 	err = userResult.Decode(&user)
@@ -104,23 +111,26 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+
+	// Check if password matches
 	err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(*login.Password))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
+	// Create a JWT for the user that expires in 15 minutes
 	claims := jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtString, err := token.SignedString([]byte("MunchIsReallyCool"))
+	jwtString, err := token.SignedString([]byte("MunchIsReallyCool")) // TODO: Move the secret to an env var
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	// Create the response
 	resp, err := json.Marshal(loginResponse{
 		Token: jwtString,
 	})
