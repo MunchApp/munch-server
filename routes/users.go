@@ -105,7 +105,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Find user in database
 	var user models.JSONUser
-	userResult := Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(login.Email))
+	userResult := Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(*login.Email))
 	err = userResult.Decode(&user)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)

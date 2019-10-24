@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"munchserver/gqlfields"
 	"munchserver/routes"
 	"net/http"
 	"os"
@@ -46,6 +47,7 @@ func main() {
 	// Inject db to routes
 	routes.Db = db
 	routes.Router = router
+	gqlfields.Db = db
 
 	// Find port from env var or default to 80
 	port, exists := os.LookupEnv("PORT")

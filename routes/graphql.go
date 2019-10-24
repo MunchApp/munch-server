@@ -17,7 +17,8 @@ func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 	rootQuery := graphql.NewObject(
 		graphql.ObjectConfig{
 			Name:   "root",
-			Fields: rootFields},
+			Fields: rootFields,
+		},
 	)
 
 	// Mutation query
@@ -25,7 +26,8 @@ func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 	mutationQuery := graphql.NewObject(
 		graphql.ObjectConfig{
 			Name:   "Mutation",
-			Fields: mutationFields},
+			Fields: mutationFields,
+		},
 	)
 
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{

@@ -57,7 +57,11 @@ var MutationTypes = graphql.Fields{
 
 				// Insert to MongoDB
 				// Sample user
-				user1 := models.JSONUser{"1", firstname, nil, nil, "devil@gmail.com", nil}
+				user1 := models.JSONUser{
+					ID:        "1",
+					NameFirst: firstname,
+					Email:     "devil@gmail.com",
+				}
 				result, err := collection.InsertOne(context.TODO(), user1)
 				if err != nil {
 					log.Fatal(err)

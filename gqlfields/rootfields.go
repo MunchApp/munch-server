@@ -2,12 +2,11 @@ package gqlfields
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"munchserver/models"
+	"munchserver/queries"
 
 	"github.com/graphql-go/graphql"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // Sub-queries underneath root query
@@ -20,24 +19,16 @@ func GetRootQueryFields() graphql.Fields {
 				"email": &graphql.ArgumentConfig{Type: graphql.String},
 			},
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				email, ok := p.Args["email"].(string)
-				var user models.User
+				email := p.Args["email"].(string)
+				var user models.JSONUser
 
-				if ok {
-
-					userCollection := Db.Collection("users")
-
-					// Get specific user from db
-					filter := bson.D{{"email", email}}
-					err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
-					fmt.Printf("Found user: %v", user)
-					if err != nil {
-						log.Fatal(err)
-					}
-
-					return user, nil
+				// Get specific user from db
+				err := Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(email)).Decode(&user)
+				if err != nil {
+					log.Fatal(err)
 				}
-				return nil, nil
+
+				return user, nil
 			},
 		},
 	}
