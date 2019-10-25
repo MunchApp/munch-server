@@ -11,3 +11,7 @@ func UserWithEmail(email string) bson.M {
 func PushOwnedFoodTruck(foodTruckID string) bson.M {
 	return bson.M{"$push": bson.M{"ownedFoodTrucks": foodTruckID}}
 }
+
+func PushReview(reviewID string) bson.M {
+	return bson.M{"$push": bson.M{"reviews": reviewID}}
+}

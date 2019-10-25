@@ -152,7 +152,6 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Error in decoding mongo document: %v", err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }

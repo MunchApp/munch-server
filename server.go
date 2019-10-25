@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"munchserver/middleware"
+	"munchserver/models"
 	"munchserver/routes"
 	"munchserver/secrets"
 	"net/http"
@@ -23,8 +24,11 @@ func main() {
 	router.HandleFunc("/foodtrucks", routes.GetFoodTrucksHandler).Methods("GET")
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
+
+	// Auth required routes
 	router.Use(middleware.AuthenticateUser)
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
+	router.HandleFunc("/reviews", routes.PostReviewsHandler).Methods("POST")
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(secrets.GetMongoURI()))
@@ -39,6 +43,7 @@ func main() {
 	// Inject db to routes
 	routes.Db = db
 	routes.Router = router
+	models.Db = db
 
 	// Setup db indexes
 	userIndex := mongo.IndexModel{
