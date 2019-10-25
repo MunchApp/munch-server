@@ -32,7 +32,7 @@ var RootFields = graphql.Fields{
 	},
 	// Get food truck info
 	"foodtruck": &graphql.Field{
-		Type: foodTruckType,
+		Type: FoodTruckType,
 		Args: graphql.FieldConfigArgument{ // Can define specific foodtruck from here by name or address
 			"name":    &graphql.ArgumentConfig{Type: graphql.String},
 			"address": &graphql.ArgumentConfig{Type: graphql.String},
