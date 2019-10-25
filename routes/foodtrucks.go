@@ -38,6 +38,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	foodTruckDecoder := json.NewDecoder(r.Body)
 	foodTruckDecoder.DisallowUnknownFields()
 
+	// Decode request
 	var newFoodTruck addFoodTruckRequest
 	err := foodTruckDecoder.Decode(&newFoodTruck)
 	if err != nil {
@@ -54,6 +55,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Generate uuid for food truck
 	uuid, err := uuid.NewRandom()
 	if err != nil {
 		log.Printf("ERROR: %v", err)
