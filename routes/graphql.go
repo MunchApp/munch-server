@@ -30,6 +30,7 @@ func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 
+	//define new schema
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
 		Query:    rootQuery,
 		Mutation: mutationQuery,
@@ -38,8 +39,10 @@ func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	//get query and apply
 	body, err := ioutil.ReadAll(r.Body)
 
+	//send result
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
 		RequestString: string(body),
