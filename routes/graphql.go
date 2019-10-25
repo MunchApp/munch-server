@@ -22,10 +22,10 @@ func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	// Mutation query
-	mutationFields := gqlfields.MutationTypes
+	mutationFields := gqlfields.MutationFields
 	mutationQuery := graphql.NewObject(
 		graphql.ObjectConfig{
-			Name:   "Mutation",
+			Name:   "mutation",
 			Fields: mutationFields,
 		},
 	)

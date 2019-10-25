@@ -10,7 +10,7 @@ import (
 )
 
 // Sub-queries underneath mutation query
-var MutationTypes = graphql.Fields{
+var MutationFields = graphql.Fields{
 	"create": &graphql.Field{
 		Type: UserType,
 		Args: graphql.FieldConfigArgument{ //Can define specific user from here
