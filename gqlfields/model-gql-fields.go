@@ -14,7 +14,7 @@ var UserType = graphql.NewObject(graphql.ObjectConfig{
 })
 
 // GQL Fields to RETURN for foodTruck
-var foodTruckType = graphql.NewObject(graphql.ObjectConfig{
+var FoodTruckType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "foodTruckFields",
 	Fields: graphql.Fields{
 		"name":  &graphql.Field{Type: graphql.String},
@@ -26,7 +26,7 @@ var foodTruckType = graphql.NewObject(graphql.ObjectConfig{
 })
 
 // GQL Fields to RETURN for reviews
-var reviewType = graphql.NewObject(graphql.ObjectConfig{
+var ReviewType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "reviewFields",
 	Fields: graphql.Fields{
 		"id":  &graphql.Field{Type: graphql.String},
@@ -36,13 +36,3 @@ var reviewType = graphql.NewObject(graphql.ObjectConfig{
 		"date": &graphql.Field{Type: graphql.String},
 	},
 })
-
-/*
-	ID       string  `json:"id" bson:"_id"`
-	Reviewer string  `json:"reviewer" bson:"reviewer"`
-	Comment  string  `json:"comment" bson:"comment"`
-	Rating   float32 `json:"rating" bson:"rating"`
-	Date     string  `json:"date" bson:"date"`
-*/
-
-
