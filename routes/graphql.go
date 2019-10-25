@@ -13,7 +13,7 @@ import (
 func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Root query
-	rootFields := gqlfields.GetRootQueryFields()
+	rootFields := gqlfields.RootFields
 	rootQuery := graphql.NewObject(
 		graphql.ObjectConfig{
 			Name:   "root",
@@ -30,7 +30,7 @@ func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 
-	//define new schema
+	// Defines query schemas
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
 		Query:    rootQuery,
 		Mutation: mutationQuery,
@@ -39,10 +39,10 @@ func GetGraphQLHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	//get query and apply
+	// Get query and apply
 	body, err := ioutil.ReadAll(r.Body)
 
-	//send result
+	// Send result
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
 		RequestString: string(body),

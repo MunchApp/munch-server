@@ -9,8 +9,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-// Sub-queries underneath root query
-
+// Sub-queries underneath mutation query
 var MutationTypes = graphql.Fields{
 	"create": &graphql.Field{
 		Type: UserType,
