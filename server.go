@@ -26,6 +26,8 @@ func main() {
 
 	// Auth required routes
 	router.Use(middleware.AuthenticateUser)
+	router.HandleFunc("/users/{userID}", routes.GetUserHandler).Methods("GET")
+	router.HandleFunc("/profile", routes.GetProfileHandler).Methods("GET")
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
 	router.HandleFunc("/reviews", routes.PostReviewsHandler).Methods("POST")
 
