@@ -21,7 +21,7 @@ var FoodTruckType = graphql.NewObject(graphql.ObjectConfig{
 		"address": &graphql.Field{Type: graphql.String},
 		"avgRating": &graphql.Field{Type: graphql.Float},
 		"hours": &graphql.Field{Type: graphql.NewList(graphql.String)},
-		"reviews": &graphql.Field{Type: graphql.NewList(reviewType)},
+		"reviews": &graphql.Field{Type: graphql.NewList(ReviewType)},
 	},
 })
 
