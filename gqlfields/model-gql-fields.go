@@ -36,11 +36,3 @@ var ReviewType = graphql.NewObject(graphql.ObjectConfig{
 		"date":     &graphql.Field{Type: graphql.String},
 	},
 })
-
-/*
-	ID       string  `json:"id" bson:"_id"`
-	Reviewer string  `json:"reviewer" bson:"reviewer"`
-	Comment  string  `json:"comment" bson:"comment"`
-	Rating   float32 `json:"rating" bson:"rating"`
-	Date     string  `json:"date" bson:"date"`
-*/

@@ -33,7 +33,7 @@ func main() {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("This is where the error is ",err)
 		return
 	}
 
@@ -62,7 +62,7 @@ func main() {
 	}
 	_, err = db.Collection("users").Indexes().CreateOne(context.TODO(), userIndex)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("This is the second error",err)
 	}
 
 	fmt.Println("Connected to MongoDB!")
