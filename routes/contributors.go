@@ -81,6 +81,29 @@ func GetContributorsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 	}
 
+	///////////////////////////////////////////
+	// GETTING CONTRIBUTIONS FROM scraperbot //
+	///////////////////////////////////////////
+
+	fmt.Println("getting scraperbot contributions...")
+
+	//get users from the HTTP link
+	respScraper, errScraper := http.Get("https://api.github.com/repos/MunchApp/scraperbot/contributors")
+	if errScraper != nil {
+		fmt.Println("error:", errScraper)
+	}
+
+	//close the response
+	defer respScraper.Body.Close()
+	bodyScraper, errScraper := ioutil.ReadAll(respScraper.Body)
+
+	//Create an array and print the contents of the array
+	var contributorResponsesScraper []ContributorResponse
+	jsonErrScraper := json.Unmarshal(bodyScraper, &contributorResponsesScraper)
+	if jsonErrScraper != nil {
+		fmt.Println("error:", jsonErrScraper)
+	}
+
 	//////////////////////////////////////
 	// GETTING ALL OF THE CLOSED ISSUES //
 	//////////////////////////////////////
@@ -114,6 +137,22 @@ func GetContributorsHandler(w http.ResponseWriter, r *http.Request) {
 	var contributorServerClosedIssues []IssueResponse
 	closedIssueErrServer := json.Unmarshal(bodyClosedServer, &contributorServerClosedIssues)
 	if closedIssueErrServer != nil {
+		fmt.Println("Error creating closed issue array...")
+	}
+
+	fmt.Println("getting scraperbot closed issues...")
+
+	respClosedScraper, errClosedScraper := http.Get("https://api.github.com/repos/MunchApp/scraperbot/issues?state=closed")
+	if errClosedScraper != nil {
+		fmt.Println("Error getting Github Closed Issues: ", errClosedScraper)
+	}
+
+	defer respClosedScraper.Body.Close()
+	bodyClosedScraper, errClosedScraper := ioutil.ReadAll(respClosedScraper.Body)
+
+	var contributorScraperClosedIssues []IssueResponse
+	closedIssueErrScraper := json.Unmarshal(bodyClosedScraper, &contributorScraperClosedIssues)
+	if closedIssueErrScraper != nil {
 		fmt.Println("Error creating closed issue array...")
 	}
 
@@ -153,37 +192,60 @@ func GetContributorsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error during unmarshal Open issues JSON...")
 	}
 
+	fmt.Println("getting scraperbot open issues...")
+
+	respOpenScraper, errOpenScraper := http.Get("https://api.github.com/repos/MunchApp/scraperbot/issues")
+	if errOpenScraper != nil {
+		fmt.Println("Error getting Open Issues HTTP Request...")
+	}
+
+	defer respOpenScraper.Body.Close()
+	bodyOpenScraper, errOpenScraper := ioutil.ReadAll(respOpenScraper.Body)
+
+	var contributorScraperOpenIssues []IssueResponse
+	openIssueErrScraper := json.Unmarshal(bodyOpenScraper, &contributorScraperOpenIssues)
+	if openIssueErrScraper != nil {
+		fmt.Println("Error during unmarshal Open issues JSON...")
+	}
+
 	//////////////////////////////////
 	// CREATING THE RETURN RESPONSE //
 	//////////////////////////////////
 
-	yasira := newReturnResponse("yasirayounus", contributorResponsesServer, contributorResponsesApp)
+	yasira := newReturnResponse("yasirayounus", contributorResponsesServer, contributorResponsesApp, contributorResponsesScraper)
 	yasira.Issues = newIssueCount("yasirayounus", contributorAppClosedIssues, contributorAppOpenIssues)
 	yasira.Issues += newIssueCount("yasirayounus", contributorServerClosedIssues, contributorServerOpenIssues)
+	yasira.Issues += newIssueCount("yasirayounus", contributorScraperClosedIssues, contributorScraperOpenIssues)
 
-	kenny := newReturnResponse("kftang", contributorResponsesServer, contributorResponsesApp)
+	kenny := newReturnResponse("kftang", contributorResponsesServer, contributorResponsesApp, contributorResponsesScraper)
 	kenny.Issues = newIssueCount("kftang", contributorAppClosedIssues, contributorAppOpenIssues)
 	kenny.Issues += newIssueCount("kftang", contributorServerClosedIssues, contributorServerOpenIssues)
+	kenny.Issues += newIssueCount("kftang", contributorScraperClosedIssues, contributorScraperOpenIssues)
 
-	luke := newReturnResponse("Lmnorrell99", contributorResponsesServer, contributorResponsesApp)
+	luke := newReturnResponse("Lmnorrell99", contributorResponsesServer, contributorResponsesApp, contributorResponsesScraper)
 	luke.Issues = newIssueCount("Lmnorrell99", contributorAppClosedIssues, contributorAppOpenIssues)
 	luke.Issues += newIssueCount("Lmnorrell99", contributorServerClosedIssues, contributorServerOpenIssues)
+	luke.Issues += newIssueCount("Lmnorrell99", contributorScraperClosedIssues, contributorScraperOpenIssues)
 
-	janine := newReturnResponse("janinebar", contributorResponsesServer, contributorResponsesApp)
+	janine := newReturnResponse("janinebar", contributorResponsesServer, contributorResponsesApp, contributorResponsesScraper)
 	janine.Issues = newIssueCount("janinebar", contributorAppClosedIssues, contributorAppOpenIssues)
 	janine.Issues += newIssueCount("janinebar", contributorServerClosedIssues, contributorServerOpenIssues)
+	janine.Issues += newIssueCount("janinebar", contributorScraperClosedIssues, contributorScraperOpenIssues)
 
-	syed := newReturnResponse("Majjalpee", contributorResponsesServer, contributorResponsesApp)
+	syed := newReturnResponse("Majjalpee", contributorResponsesServer, contributorResponsesApp, contributorResponsesScraper)
 	syed.Issues = newIssueCount("Majjalpee", contributorAppClosedIssues, contributorAppOpenIssues)
 	syed.Issues += newIssueCount("Majjalpee", contributorServerClosedIssues, contributorServerOpenIssues)
+	syed.Issues += newIssueCount("Majjalpee", contributorScraperClosedIssues, contributorScraperOpenIssues)
 
-	rafael := newReturnResponse("RafaelHerrejon", contributorResponsesServer, contributorResponsesApp)
+	rafael := newReturnResponse("RafaelHerrejon", contributorResponsesServer, contributorResponsesApp, contributorResponsesScraper)
 	rafael.Issues = newIssueCount("RafaelHerrejon", contributorAppClosedIssues, contributorAppOpenIssues)
 	rafael.Issues += newIssueCount("RafaelHerrejon", contributorServerClosedIssues, contributorServerOpenIssues)
+	rafael.Issues += newIssueCount("RafaelHerrejon", contributorScraperClosedIssues, contributorScraperOpenIssues)
 
-	andrea := newReturnResponse("ngynandrea", contributorResponsesServer, contributorResponsesApp)
+	andrea := newReturnResponse("ngynandrea", contributorResponsesServer, contributorResponsesApp, contributorResponsesScraper)
 	andrea.Issues = newIssueCount("ngynandrea", contributorAppClosedIssues, contributorAppOpenIssues)
 	andrea.Issues += newIssueCount("ngynandrea", contributorServerClosedIssues, contributorServerOpenIssues)
+	andrea.Issues += newIssueCount("ngynandrea", contributorScraperClosedIssues, contributorScraperOpenIssues)
 
 	var returnResponses [7]ReturnResponse
 
@@ -212,7 +274,7 @@ func GetContributorsHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func newReturnResponse(username string, serverResponse []ContributorResponse, appResponse []ContributorResponse) *ReturnResponse {
+func newReturnResponse(username string, serverResponse []ContributorResponse, appResponse []ContributorResponse, scraperResponse []ContributorResponse) *ReturnResponse {
 
 	r := ReturnResponse{Username: username}
 	r.Contributions = 0
@@ -224,6 +286,12 @@ func newReturnResponse(username string, serverResponse []ContributorResponse, ap
 	}
 
 	for i := 0; i < len(appResponse); i++ {
+		if appResponse[i].Username == r.Username {
+			r.Contributions += appResponse[i].Contributions
+		}
+	}
+
+	for i := 0; i < len(scraperResponse); i++ {
 		if appResponse[i].Username == r.Username {
 			r.Contributions += appResponse[i].Contributions
 		}
