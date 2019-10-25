@@ -6,6 +6,7 @@ import (
 	"log"
 	"munchserver/models"
 	"munchserver/queries"
+	"munchserver/secrets"
 	"net/http"
 	"time"
 
@@ -125,9 +126,11 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a JWT for the user that expires in 15 minutes
 	claims := jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+		Subject:   user.ID,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtString, err := token.SignedString([]byte("MunchIsReallyCool")) // TODO: Move the secret to an env var
+	jwtSecret, _ := secrets.GetJWTSecret(nil)
+	jwtString, err := token.SignedString(jwtSecret)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

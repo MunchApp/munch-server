@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"munchserver/middleware"
 	"munchserver/routes"
+	"munchserver/secrets"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,35 +23,22 @@ func main() {
 	router.HandleFunc("/foodtrucks", routes.GetFoodTrucksHandler).Methods("GET")
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
+	router.Use(middleware.AuthenticateUser)
+	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
 
 	// Connect to MongoDB
-	mongoURI, exists := os.LookupEnv("MONGODB_URI")
-	if !exists {
-		mongoURI = "mongodb://localhost:27017"
-	}
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(secrets.GetMongoURI()))
 
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	dbName, exists := os.LookupEnv("MONGODB_DBNAME")
-	if !exists {
-		dbName = "munch"
-	}
-
-	db := client.Database(dbName)
+	db := client.Database(secrets.GetMongoDBName())
 
 	// Inject db to routes
 	routes.Db = db
 	routes.Router = router
-
-	// Find port from env var or default to 80
-	port, exists := os.LookupEnv("PORT")
-	if !exists {
-		port = "80"
-	}
 
 	// Setup db indexes
 	userIndex := mongo.IndexModel{
@@ -63,5 +51,5 @@ func main() {
 	}
 
 	fmt.Println("Connected to MongoDB!")
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+secrets.GetPort(), router))
 }
