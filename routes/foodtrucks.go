@@ -8,6 +8,7 @@ import (
 	"munchserver/middleware"
 	"munchserver/models"
 	"net/http"
+	"regexp"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -53,6 +54,26 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		newFoodTruck.Photos == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
+	}
+
+	// Validate hours
+	for i := 0; i < 7; i++ {
+		validOpenTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, newFoodTruck.Hours[i][0])
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		validCloseTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, newFoodTruck.Hours[i][1])
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if !validOpenTime || !validCloseTime {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	}
 
 	// Generate uuid for food truck
@@ -101,7 +122,7 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	foodTrucksCollection := Db.Collection("foodTrucks")
 	cur, err := foodTrucksCollection.Find(context.TODO(), bson.D{})
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Error in database: %v", err)
 		return
 	}
@@ -116,11 +137,11 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Convert users to json
 	js, err := json.Marshal(foodTrucks)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Error in decoding mongo document: %v", err)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
