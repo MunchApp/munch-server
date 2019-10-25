@@ -68,12 +68,15 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create and insert user into database
 	registeredUser := models.JSONUser{
-		ID:           uuid.String(),
-		PasswordHash: hashedPassword,
-		NameFirst:    *newUser.NameFirst,
-		NameLast:     *newUser.NameLast,
-		Email:        *newUser.Email,
-		DateOfBirth:  *newUser.DateOfBirth,
+		ID:              uuid.String(),
+		PasswordHash:    hashedPassword,
+		NameFirst:       *newUser.NameFirst,
+		NameLast:        *newUser.NameLast,
+		Email:           *newUser.Email,
+		DateOfBirth:     *newUser.DateOfBirth,
+		Favorites:       []string{},
+		Reviews:         []string{},
+		OwnedFoodTrucks: []string{},
 	}
 	_, err = Db.Collection("users").InsertOne(context.TODO(), registeredUser)
 
@@ -109,8 +112,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Find user in database
 	var user models.JSONUser
-	userResult := Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(login.Email))
-	err = userResult.Decode(&user)
+	err = Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(*login.Email)).Decode(&user)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return

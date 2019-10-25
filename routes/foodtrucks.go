@@ -7,6 +7,7 @@ import (
 	"log"
 	"munchserver/middleware"
 	"munchserver/models"
+	"munchserver/queries"
 	"net/http"
 	"regexp"
 
@@ -28,10 +29,10 @@ type addFoodTruckRequest struct {
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get user from context
-	user := r.Context().Value(middleware.UserKey)
+	user, ok := r.Context().Value(middleware.UserKey).(string)
 
 	// Check for a user, or if the user agent is from the scraper
-	if user == nil && r.Header.Get("User-Agent") != "MunchCritic/1.0" {
+	if !ok && r.Header.Get("User-Agent") != "MunchCritic/1.0" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -95,7 +96,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		Name:        *newFoodTruck.Name,
 		Address:     *newFoodTruck.Address,
 		Location:    newFoodTruck.Location,
-		Owner:       user.(string),
+		Owner:       user,
 		Hours:       *newFoodTruck.Hours,
 		Reviews:     []string{},
 		Photos:      *newFoodTruck.Photos,
@@ -111,6 +112,16 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	// Update user that owns food truck
+	if user != "" {
+		_, err = Db.Collection("users").UpdateOne(context.TODO(), queries.WithID(user), queries.PushOwnedFoodTruck(uuid.String()))
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Send response
