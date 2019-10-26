@@ -1,10 +1,10 @@
-package tests
+package routes
 
 import (
 	"bytes"
 	"context"
-	"munchserver/routes"
 	"munchserver/secrets"
+	"munchserver/tests"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,24 +21,24 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	db = client.Database(secrets.GetTestMongoDBName())
-	// Inject db to routes
-	routes.Db = db
+	Db = client.Database(secrets.GetTestMongoDBName())
+	// Inject db to tests
+	tests.Db = Db
 
 	code := m.Run()
 
-	clearDB()
+	tests.ClearDB()
 	os.Exit(code)
 }
 
 func TestInvalidLogin(t *testing.T) {
-	clearDB()
+	tests.ClearDB()
 	loginBody := []byte(`{"email": "invalid@email.com", "password": "notMyPassword"}`)
 	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(loginBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(routes.PostLoginHandler)
+	handler := http.HandlerFunc(PostLoginHandler)
 	handler.ServeHTTP(rr, req)
 	if rr.Code != http.StatusUnauthorized {
 		t.Errorf("login with invalid credentials expected status code of %v, but got %v", http.StatusUnauthorized, rr.Code)
@@ -46,13 +46,13 @@ func TestInvalidLogin(t *testing.T) {
 }
 
 func TestValidRegister(t *testing.T) {
-	clearDB()
+	tests.ClearDB()
 	registerBody := []byte(`{"firstName":"some", "lastName": "tester", "email": "tester@example.com", "password": "password123", "dateOfBirth": "1969-04-20T05:00:00.000Z"}`)
 	req, _ := http.NewRequest("POST", "/register", bytes.NewBuffer(registerBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(routes.PostRegisterHandler)
+	handler := http.HandlerFunc(PostRegisterHandler)
 	handler.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
 		t.Errorf("register with valid information expected status code of %v, but got %v", http.StatusOK, rr.Code)

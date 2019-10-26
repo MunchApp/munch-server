@@ -7,10 +7,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var db *mongo.Database
+var Db *mongo.Database
 
-func clearDB() {
-	db.Collection("users").DeleteMany(context.TODO(), queries.All())
-	db.Collection("foodTrucks").DeleteMany(context.TODO(), queries.All())
-	db.Collection("reviews").DeleteMany(context.TODO(), queries.All())
+func ClearDB() {
+	Db.Collection("users").DeleteMany(context.TODO(), queries.All())
+	Db.Collection("foodTrucks").DeleteMany(context.TODO(), queries.All())
+	Db.Collection("reviews").DeleteMany(context.TODO(), queries.All())
 }
