@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"munchserver/middleware"
@@ -81,7 +80,7 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		Reviews:         []string{},
 		OwnedFoodTrucks: []string{},
 	}
-	_, err = Db.Collection("users").InsertOne(context.TODO(), registeredUser)
+	_, err = Db.Collection("users").InsertOne(r.Context(), registeredUser)
 
 	// If there is an error, it is most likely a duplicate user (email must be unique)
 	if err != nil {
@@ -115,7 +114,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Find user in database
 	var user models.JSONUser
-	err = Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(*login.Email)).Decode(&user)
+	err = Db.Collection("users").FindOne(r.Context(), queries.UserWithEmail(*login.Email)).Decode(&user)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusUnauthorized)

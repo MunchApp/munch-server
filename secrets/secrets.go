@@ -27,6 +27,14 @@ func GetMongoDBName() string {
 	return dbName
 }
 
+func GetTestMongoDBName() string {
+	dbName, exists := os.LookupEnv("MONGODB_TESTDBNAME")
+	if !exists {
+		dbName = "munch_test"
+	}
+	return dbName
+}
+
 func GetPort() string {
 	// Find port from env var or default to 80
 	port, exists := os.LookupEnv("PORT")
