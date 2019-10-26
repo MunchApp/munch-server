@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"munchserver/middleware"
 	"munchserver/models"
@@ -29,10 +28,10 @@ type addFoodTruckRequest struct {
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get user from context
-	user, ok := r.Context().Value(middleware.UserKey).(string)
+	user, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
 	// Check for a user, or if the user agent is from the scraper
-	if !ok && r.Header.Get("User-Agent") != "MunchCritic/1.0" {
+	if !userLoggedIn && r.Header.Get("User-Agent") != "MunchCritic/1.0" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -44,6 +43,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	var newFoodTruck addFoodTruckRequest
 	err := foodTruckDecoder.Decode(&newFoodTruck)
 	if err != nil {
+		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -133,8 +133,8 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	foodTrucksCollection := Db.Collection("foodTrucks")
 	cur, err := foodTrucksCollection.Find(context.TODO(), bson.D{})
 	if err != nil {
+		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Error in database: %v", err)
 		return
 	}
 
@@ -146,12 +146,6 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert users to json
-	js, err := json.Marshal(foodTrucks)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Error in decoding mongo document: %v", err)
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	json.NewEncoder(w).Encode(foodTrucks)
 }

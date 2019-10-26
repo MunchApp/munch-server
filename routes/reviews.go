@@ -135,13 +135,6 @@ func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert users to json
-	js, err := json.Marshal(reviews)
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error in decoding mongo document: %v", err)
-		return
-	}
-	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	json.NewEncoder(w).Encode(reviews)
 }

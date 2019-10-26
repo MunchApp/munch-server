@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"munchserver/middleware"
 	"munchserver/models"
 	"munchserver/queries"
 	"munchserver/secrets"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -41,6 +43,7 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var newUser registerRequest
 	err := userDecoder.Decode(&newUser)
 	if err != nil {
+		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -114,6 +117,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 	var user models.JSONUser
 	err = Db.Collection("users").FindOne(context.TODO(), queries.UserWithEmail(*login.Email)).Decode(&user)
 	if err != nil {
+		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -121,6 +125,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if password matches
 	err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(*login.Password))
 	if err != nil {
+		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -151,4 +156,51 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
+}
+
+func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
+	// Get user from context
+	userID, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user, or if the user agent is from the scraper
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// Get user from database
+	var user models.JSONUser
+	err := Db.Collection("users").FindOne(r.Context(), queries.WithID(userID), queries.OptionsWithProjection(queries.ProfileProjection())).Decode(&user)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
+func GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	// Get user id from route params
+	params := mux.Vars(r)
+	userID, userIDExists := params["userID"]
+	if !userIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get user from database
+	var user models.JSONUser
+	err := Db.Collection("users").FindOne(r.Context(), queries.WithID(userID), queries.OptionsWithProjection(queries.UserProjection())).Decode(&user)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
 }
