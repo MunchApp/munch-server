@@ -2,34 +2,11 @@ package routes
 
 import (
 	"bytes"
-	"context"
-	"munchserver/secrets"
 	"munchserver/tests"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-func TestMain(m *testing.M) {
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(secrets.GetMongoURI()))
-	if err != nil {
-		panic(err)
-	}
-
-	Db = client.Database(secrets.GetTestMongoDBName())
-	// Inject db to tests
-	tests.Db = Db
-
-	code := m.Run()
-
-	tests.ClearDB()
-	os.Exit(code)
-}
 
 func TestInvalidLogin(t *testing.T) {
 	tests.ClearDB()
