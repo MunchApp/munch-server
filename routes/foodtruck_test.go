@@ -16,7 +16,7 @@ func TestFoodTruckGet(t *testing.T) {
 		t.Errorf("getting all food trucks expected status code of %v, but got %v", http.StatusOK, rr.Code)
 	}
 	body, _ := ioutil.ReadAll(rr.Body)
-	if string(body) != "[]" {
+	if string(body) != "[]\n" {
 		t.Errorf("expected empty array, but got %v", string(body))
 	}
 }
