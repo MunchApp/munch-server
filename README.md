@@ -1,5 +1,6 @@
 # Munch Server
-![travis](https://travis-ci.com/MunchApp/munchserver.svg?branch=master)
+[![travis](https://travis-ci.com/MunchApp/munchserver.svg?branch=master)](https://travis-ci.com/MunchApp/munchserver)
+[![Coverage Status](https://coveralls.io/repos/github/MunchApp/munchserver/badge.svg)](https://coveralls.io/github/MunchApp/munchserver)
 
 ## Running Server
 
