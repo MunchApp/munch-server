@@ -25,7 +25,10 @@ func TestMain(m *testing.M) {
 	// Inject db to routes
 	routes.Db = db
 
-	os.Exit(m.Run())
+	code := m.Run()
+
+	clearDB()
+	os.Exit(code)
 }
 
 func TestInvalidLogin(t *testing.T) {
