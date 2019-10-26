@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"munchserver/middleware"
-	"munchserver/models"
 	"munchserver/routes"
 	"munchserver/secrets"
 	"net/http"
@@ -43,7 +42,6 @@ func main() {
 	// Inject db to routes
 	routes.Db = db
 	routes.Router = router
-	models.Db = db
 
 	// Setup db indexes
 	userIndex := mongo.IndexModel{
