@@ -9,3 +9,7 @@ func All() bson.M {
 func WithID(id string) bson.M {
 	return bson.M{"_id": id}
 }
+
+func WithFoodTruck(id string) bson.M {
+	return bson.M{"foodTruck": id}
+}
