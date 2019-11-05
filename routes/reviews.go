@@ -137,14 +137,14 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get users from cursor, convert to empty slice if no users in DB
+	// Get reviews from cursor, convert to empty slice if no reviews in DB
 	var reviews []models.JSONReview
 	cur.All(context.TODO(), &reviews)
 	if reviews == nil {
 		reviews = make([]models.JSONReview, 0)
 	}
 
-	// Convert users to json
+	// Convert reviews to json
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(reviews)
 }
@@ -159,14 +159,14 @@ func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get users from cursor, convert to empty slice if no users in DB
+	// Get reviews from cursor, convert to empty slice if no reviews in DB
 	var reviews []models.JSONReview
 	cur.All(context.TODO(), &reviews)
 	if reviews == nil {
 		reviews = make([]models.JSONReview, 0)
 	}
 
-	// Convert users to json
+	// Convert reviews to json
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(reviews)
 }
