@@ -10,6 +10,10 @@ func WithID(id string) bson.M {
 	return bson.M{"_id": id}
 }
 
+func WithIDs(ids []string) bson.M {
+	return bson.M{"_id": bson.M{"$in": ids}}
+}
+
 func WithFoodTruck(id string) bson.M {
 	return bson.M{"foodTruck": id}
 }

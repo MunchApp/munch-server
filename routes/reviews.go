@@ -1,9 +1,7 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"munchserver/middleware"
 	"munchserver/models"
@@ -123,23 +121,35 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	foodTruckID, foodTruckIDExists := params["foodTruckID"]
 
+	log.Printf("%v", params)
+
 	if !foodTruckIDExists {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	// Check that food truck exists
+	var foodTruck models.JSONFoodTruck
+	foodTrucksCollection := Db.Collection("foodTrucks")
+	err := foodTrucksCollection.FindOne(r.Context(), queries.WithID(foodTruckID)).Decode(&foodTruck)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	// Get all reviews with foodtruck from the database into a cursor
 	reviewsCollection := Db.Collection("reviews")
-	cur, err := reviewsCollection.Find(context.TODO(), queries.WithFoodTruck(foodTruckID))
+	cur, err := reviewsCollection.Find(r.Context(), queries.WithIDs(foodTruck.Reviews))
 	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error in database: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Error in database: %v", err)
 		return
 	}
 
 	// Get reviews from cursor, convert to empty slice if no reviews in DB
 	var reviews []models.JSONReview
-	cur.All(context.TODO(), &reviews)
+	cur.All(r.Context(), &reviews)
 	if reviews == nil {
 		reviews = make([]models.JSONReview, 0)
 	}
@@ -152,16 +162,16 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all reviews from the database into a cursor
 	reviewsCollection := Db.Collection("reviews")
-	cur, err := reviewsCollection.Find(context.TODO(), bson.D{})
+	cur, err := reviewsCollection.Find(r.Context(), bson.D{})
 	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error in database: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Error in database: %v", err)
 		return
 	}
 
 	// Get reviews from cursor, convert to empty slice if no reviews in DB
 	var reviews []models.JSONReview
-	cur.All(context.TODO(), &reviews)
+	cur.All(r.Context(), &reviews)
 	if reviews == nil {
 		reviews = make([]models.JSONReview, 0)
 	}

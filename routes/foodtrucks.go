@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"munchserver/middleware"
@@ -107,7 +106,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add food truck to database
-	_, err = Db.Collection("foodTrucks").InsertOne(context.TODO(), addedFoodTruck)
+	_, err = Db.Collection("foodTrucks").InsertOne(r.Context(), addedFoodTruck)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -116,7 +115,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Update user that owns food truck
 	if user != "" {
-		_, err = Db.Collection("users").UpdateOne(context.TODO(), queries.WithID(user), queries.PushOwnedFoodTruck(uuid.String()))
+		_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(user), queries.PushOwnedFoodTruck(uuid.String()))
 		if err != nil {
 			log.Printf("ERROR: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -131,7 +130,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
-	cur, err := foodTrucksCollection.Find(context.TODO(), bson.D{})
+	cur, err := foodTrucksCollection.Find(r.Context(), bson.D{})
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -140,7 +139,7 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get users from cursor, convert to empty slice if no users in DB
 	var foodTrucks []models.JSONFoodTruck
-	cur.All(context.TODO(), &foodTrucks)
+	cur.All(r.Context(), &foodTrucks)
 	if foodTrucks == nil {
 		foodTrucks = make([]models.JSONFoodTruck, 0)
 	}
