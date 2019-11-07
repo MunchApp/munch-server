@@ -221,7 +221,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	if len(currentFoodTruck.Location) != 0 {
 		updateData = append(updateData, bson.E{"location", currentFoodTruck.Location})
 	}
-	if currentFoodTruck.Status != false {
+	if currentFoodTruck.Status != false || currentFoodTruck.Status != true {
 		updateData = append(updateData, bson.E{"status", currentFoodTruck.Status})
 	}
 	// Validate hours if updating
