@@ -29,7 +29,7 @@ type addFoodTruckRequest struct {
 }
 
 type updateFoodTruckRequest struct {
-	Name        *string      `json:"name" bson:"name"`
+	Name        string       `json:"name" bson:"name"`
 	Address     string       `json:"address" bson:"address"`
 	Location    [2]float64   `json:"location" bson:"location"`
 	Owner       string       `json:"owner" bson:"owner"`
@@ -210,6 +210,9 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Determine which fields should be updated
 	var updateData bson.D
 
+	if currentFoodTruck.Name != "" {
+		updateData = append(updateData, bson.E{"name", currentFoodTruck.Name})
+	}
 	if currentFoodTruck.Address != "" {
 		updateData = append(updateData, bson.E{"address", currentFoodTruck.Address})
 	}
