@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"munchserver/middleware"
 	"munchserver/models"
@@ -32,9 +31,7 @@ type updateFoodTruckRequest struct {
 	Name        string       `json:"name" bson:"name"`
 	Address     string       `json:"address" bson:"address"`
 	Location    [2]float64   `json:"location" bson:"location"`
-	Owner       string       `json:"owner" bson:"owner"`
 	Status      bool         `json:"status" bson:"status"`
-	AvgRating   float32      `json:"avgRating" bson:"avgRating"`
 	Hours       [7][2]string `json:"hours" bson:"hours"`
 	Reviews     []string     `json:"reviews" bson:"reviews"`
 	Photos      []string     `json:"photos" bson:"photos"`
@@ -143,7 +140,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return food truck ID
-	w.Write([]byte(addedFoodTruck.ID))
+	w.WriteHeader(http.StatusOK)
 }
 
 func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
@@ -182,7 +179,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
 	// Check for a user, or if the user agent is from the scraper
-	if !userLoggedIn && r.Header.Get("User-Agent") != "MunchCritic/1.0" {
+	if !userLoggedIn {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -262,7 +259,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		{"$set", updateData},
 	}
 
-	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context()), queries.WithID(foodTruckID), update)
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), queries.WithID(foodTruckID), update)
 	if err != nil {
 		log.Fatal(err)
 	}
