@@ -124,6 +124,9 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send response
+	w.WriteHeader(http.StatusOK)
+
+	// Return food truck ID
 	w.Write([]byte(addedFoodTruck.ID))
 }
 
