@@ -10,6 +10,7 @@ import (
 	"regexp"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -23,6 +24,19 @@ type addFoodTruckRequest struct {
 	PhoneNumber string        `json:"phoneNumber"`
 	Description string        `json:"description"`
 	Tags        []string      `json:"tags"`
+}
+
+type updateFoodTruckRequest struct {
+	Name        string       `json:"name"`
+	Address     string       `json:"address"`
+	Location    [2]float64   `json:"location"`
+	Status      bool         `json:"status"`
+	Hours       [7][2]string `json:"hours"`
+	Photos      []string     `json:"photos"`
+	Website     string       `json:"website"`
+	PhoneNumber string       `json:"phoneNumber"`
+	Description string       `json:"description"`
+	Tags        []string     `json:"tags"`
 }
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
@@ -150,4 +164,115 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Convert users to json
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(foodTrucks)
+}
+
+func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Checks for food truck ID
+	params := mux.Vars(r)
+	foodTruckID, foodTruckIDExists := params["foodTruckID"]
+	if !foodTruckIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get user from context
+	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	foodTruckDecoder := json.NewDecoder(r.Body)
+	foodTruckDecoder.DisallowUnknownFields()
+
+	// Decode request
+	var currentFoodTruck updateFoodTruckRequest
+	err := foodTruckDecoder.Decode(&currentFoodTruck)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Set tags to an empty array if they don't exist
+	tags := currentFoodTruck.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+
+	// Set photos to an empty array if they don't exist
+	photos := currentFoodTruck.Photos
+	if photos == nil {
+		photos = []string{}
+	}
+
+	// Determine which fields should be updated
+	var updateData bson.D
+
+	if currentFoodTruck.Name != "" {
+		updateData = append(updateData, bson.E{"name", currentFoodTruck.Name})
+	}
+	if currentFoodTruck.Address != "" {
+		updateData = append(updateData, bson.E{"address", currentFoodTruck.Address})
+	}
+	if len(currentFoodTruck.Location) != 0 {
+		updateData = append(updateData, bson.E{"location", currentFoodTruck.Location})
+	}
+	if currentFoodTruck.Status != false {
+		updateData = append(updateData, bson.E{"status", currentFoodTruck.Status})
+	}
+	// Validate hours if updating
+	if currentFoodTruck.Hours[0][0] != "" {
+		for i := 0; i < 7; i++ {
+			validOpenTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, currentFoodTruck.Hours[i][0])
+			if err != nil {
+				log.Printf("ERROR: %v", err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			validCloseTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, currentFoodTruck.Hours[i][1])
+			if err != nil {
+				log.Printf("ERROR: %v", err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			if !validOpenTime || !validCloseTime {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		}
+		updateData = append(updateData, bson.E{"hours", currentFoodTruck.Hours})
+	}
+	if currentFoodTruck.Photos != nil {
+		updateData = append(updateData, bson.E{"photos", photos})
+	}
+	if currentFoodTruck.Website != "" {
+		updateData = append(updateData, bson.E{"website", currentFoodTruck.Website})
+	}
+	if currentFoodTruck.PhoneNumber != "" {
+		updateData = append(updateData, bson.E{"phoneNumber", currentFoodTruck.PhoneNumber})
+	}
+	if currentFoodTruck.Description != "" {
+		updateData = append(updateData, bson.E{"description", currentFoodTruck.Description})
+	}
+	if len(currentFoodTruck.Tags) != 0 {
+		updateData = append(updateData, bson.E{"tags", tags})
+	}
+
+	// Update food truck document
+	update := bson.D{
+		{"$set", updateData},
+	}
+
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), queries.WithID(foodTruckID), update)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Send response
+	w.WriteHeader(http.StatusOK)
+
 }
