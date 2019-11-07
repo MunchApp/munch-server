@@ -242,7 +242,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 			validCloseTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, currentFoodTruck.Hours[i][1])
 			if err != nil {
 				log.Printf("ERROR: %v", err)
-				w.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 			if !validOpenTime || !validCloseTime {
@@ -272,7 +272,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		{"$set", updateData},
 	}
 
-	_, err = Db.Collection("foodTrucks").UpdateOne(context.TODO(), queries.WithID(foodTruckID), update)
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context()), queries.WithID(foodTruckID), update)
 	if err != nil {
 		log.Fatal(err)
 	}
