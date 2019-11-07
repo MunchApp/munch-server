@@ -226,9 +226,6 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("changed status")
 		updateData = append(updateData, bson.E{"status", currentFoodTruck.Status})
 	}
-	if currentFoodTruck.AvgRating != 0 {
-		updateData = append(updateData, bson.E{"avgRating", currentFoodTruck.AvgRating})
-	}
 	// Validate hours if updating
 	if currentFoodTruck.Hours[0][0] != "" {
 		fmt.Println("---going into time")
@@ -236,7 +233,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 			validOpenTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, currentFoodTruck.Hours[i][0])
 			if err != nil {
 				log.Printf("ERROR: %v", err)
-				w.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 			validCloseTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, currentFoodTruck.Hours[i][1])
