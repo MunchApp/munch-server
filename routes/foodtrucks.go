@@ -139,7 +139,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Return food truck ID
+	// Send response
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -178,7 +178,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get user from context
 	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
-	// Check for a user, or if the user agent is from the scraper
+	// Check for a user
 	if !userLoggedIn {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
