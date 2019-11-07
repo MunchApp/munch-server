@@ -1,9 +1,7 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"munchserver/middleware"
 	"munchserver/models"
@@ -12,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -117,24 +116,67 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
-	// Get all users from the database into a cursor
-	reviewsCollection := Db.Collection("reviews")
-	cur, err := reviewsCollection.Find(context.TODO(), bson.D{})
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error in database: %v", err)
+func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
+	// Get food truck id from route params
+	params := mux.Vars(r)
+	foodTruckID, foodTruckIDExists := params["foodTruckID"]
+
+	log.Printf("%v", params)
+
+	if !foodTruckIDExists {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Get users from cursor, convert to empty slice if no users in DB
+	// Check that food truck exists
+	var foodTruck models.JSONFoodTruck
+	foodTrucksCollection := Db.Collection("foodTrucks")
+	err := foodTrucksCollection.FindOne(r.Context(), queries.WithID(foodTruckID)).Decode(&foodTruck)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Get all reviews with foodtruck from the database into a cursor
+	reviewsCollection := Db.Collection("reviews")
+	cur, err := reviewsCollection.Find(r.Context(), queries.WithIDs(foodTruck.Reviews))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Error in database: %v", err)
+		return
+	}
+
+	// Get reviews from cursor, convert to empty slice if no reviews in DB
 	var reviews []models.JSONReview
-	cur.All(context.TODO(), &reviews)
+	cur.All(r.Context(), &reviews)
 	if reviews == nil {
 		reviews = make([]models.JSONReview, 0)
 	}
 
-	// Convert users to json
+	// Convert reviews to json
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(reviews)
+}
+
+func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
+	// Get all reviews from the database into a cursor
+	reviewsCollection := Db.Collection("reviews")
+	cur, err := reviewsCollection.Find(r.Context(), bson.D{})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Error in database: %v", err)
+		return
+	}
+
+	// Get reviews from cursor, convert to empty slice if no reviews in DB
+	var reviews []models.JSONReview
+	cur.All(r.Context(), &reviews)
+	if reviews == nil {
+		reviews = make([]models.JSONReview, 0)
+	}
+
+	// Convert reviews to json
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(reviews)
 }

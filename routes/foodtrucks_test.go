@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestFoodTruckGet(t *testing.T) {
+func TestFoodTruckGetEmpty(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/foodtrucks", nil)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(GetFoodTrucksHandler)
