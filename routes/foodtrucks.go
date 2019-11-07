@@ -242,6 +242,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		updateData = append(updateData, bson.E{"hours", currentFoodTruck.Hours})
 	}
 	if currentFoodTruck.Photos != nil {
 		updateData = append(updateData, bson.E{"photos", photos})
