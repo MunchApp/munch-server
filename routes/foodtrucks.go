@@ -8,7 +8,7 @@ import (
 	"munchserver/middleware"
 	"munchserver/models"
 	"munchserver/queries"
-	http "net/http"
+	"net/http"
 	"regexp"
 
 	"github.com/google/uuid"
@@ -179,9 +179,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user from context
-	user, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
-
-	fmt.Println(user)
+	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
 	// Check for a user, or if the user agent is from the scraper
 	if !userLoggedIn && r.Header.Get("User-Agent") != "MunchCritic/1.0" {
@@ -219,16 +217,11 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	if len(currentFoodTruck.Location) != 0 {
 		updateData = append(updateData, bson.E{"location", currentFoodTruck.Location})
 	}
-	if currentFoodTruck.Owner != "" {
-		updateData = append(updateData, bson.E{"owner", currentFoodTruck.Owner})
-	}
 	if currentFoodTruck.Status != false {
-		fmt.Println("changed status")
 		updateData = append(updateData, bson.E{"status", currentFoodTruck.Status})
 	}
 	// Validate hours if updating
 	if currentFoodTruck.Hours[0][0] != "" {
-		fmt.Println("---going into time")
 		for i := 0; i < 7; i++ {
 			validOpenTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, currentFoodTruck.Hours[i][0])
 			if err != nil {
