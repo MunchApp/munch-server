@@ -28,17 +28,16 @@ type addFoodTruckRequest struct {
 }
 
 type updateFoodTruckRequest struct {
-	Name        string       `json:"name" bson:"name"`
-	Address     string       `json:"address" bson:"address"`
-	Location    [2]float64   `json:"location" bson:"location"`
-	Status      bool         `json:"status" bson:"status"`
-	Hours       [7][2]string `json:"hours" bson:"hours"`
-	Reviews     []string     `json:"reviews" bson:"reviews"`
-	Photos      []string     `json:"photos" bson:"photos"`
-	Website     string       `json:"website" bson:"website"`
-	PhoneNumber string       `json:"phoneNumber" bson:"phoneNumber"`
-	Description string       `json:"description" bson:"description"`
-	Tags        []string     `json:"tags" bson:"tags"`
+	Name        string       `json:"name"`
+	Address     string       `json:"address"`
+	Location    [2]float64   `json:"location"`
+	Status      bool         `json:"status"`
+	Hours       [7][2]string `json:"hours"`
+	Photos      []string     `json:"photos"`
+	Website     string       `json:"website"`
+	PhoneNumber string       `json:"phoneNumber"`
+	Description string       `json:"description"`
+	Tags        []string     `json:"tags"`
 }
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
@@ -202,6 +201,12 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		tags = []string{}
 	}
 
+	// Set photos to an empty array if they don't exist
+	photos := currentFoodTruck.Photos
+	if photos == nil {
+		photos = []string{}
+	}
+
 	// Determine which fields should be updated
 	var updateData bson.D
 
@@ -239,7 +244,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if currentFoodTruck.Photos != nil {
-		updateData = append(updateData, bson.E{"photos", currentFoodTruck.Photos})
+		updateData = append(updateData, bson.E{"photos", photos})
 	}
 	if currentFoodTruck.Website != "" {
 		updateData = append(updateData, bson.E{"website", currentFoodTruck.Website})
