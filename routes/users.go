@@ -324,7 +324,7 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), update)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("ERROR %v", http.StatusInternalServerError)
 	}
 
 	// Send response
