@@ -144,7 +144,7 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 	cur, err := reviewsCollection.Find(r.Context(), queries.WithIDs(foodTruck.Reviews))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Error in database: %v", err)
+		log.Printf("ERROR: %v", err)
 		return
 	}
 
@@ -166,7 +166,7 @@ func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	cur, err := reviewsCollection.Find(r.Context(), bson.D{})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Error in database: %v", err)
+		log.Printf("ERROR: %v", err)
 		return
 	}
 
