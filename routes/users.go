@@ -36,6 +36,21 @@ type registerRequest struct {
 	DateOfBirth *time.Time `json:"dateOfBirth"`
 }
 
+type updateUserRequest struct {
+	PasswordHash []byte
+	NameFirst 	*string `json:"firstName"`
+	NameLast 	*string `json:"lastName"`
+	Email 		*string `json:"email"`
+	PhoneNumber *string `json:"phoneNumber"`
+	City 		*string `json:"city"`
+	State 		*string `json:"state"`
+	DateOfBirth *time.Time `json:"dateOfBirth"`
+	OwnedFoodTrucks []string `json:"ownedFoodTrucks"`
+	Favorites 	[]string `json:"favorites"`
+	Reviews 	[]string `json:"reviews"`
+}
+
+
 // PostRegisterHandler handles the logic for registering a user
 func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Decode registered user's data
@@ -246,3 +261,87 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
+
+func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	
+	// Checks for food truck ID
+	params := mux.Vars(r)
+	userID, userIDExists := params["userID"]
+	if !userIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	
+	// Get user from context
+	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+
+	userDecoder := json.NewDecoder(r.Body)
+	userDecoder.DisallowUnknownFields()
+
+	// Decode request
+	var updatedUser updateUserRequest
+	err := userDecoder.Decode(&updatedUser)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Determine which fields should be updated
+	var updateData bson.D
+
+	if updatedUser.NameFirst != nil {
+		updateData = append(updateData, bson.E{"firstName", *updatedUser.NameFirst})
+	}
+	if updatedUser.NameLast != nil {
+		updateData = append(updateData, bson.E{"lastName", *updatedUser.NameLast})
+	}
+	if updatedUser.Email != nil {
+		updateData = append(updateData, bson.E{"email", *updatedUser.Email})
+	}
+	if updatedUser.PhoneNumber != nil {
+		updateData = append(updateData, bson.E{"phoneNumber", *updatedUser.PhoneNumber})
+	}
+	if updatedUser.City != nil {
+		updateData = append(updateData, bson.E{"city", *updatedUser.City})
+	}
+	if updatedUser.State != nil {
+		updateData = append(updateData, bson.E{"state", *updatedUser.State})
+	}
+	if updatedUser.DateOfBirth != nil {
+		updateData = append(updateData, bson.E{"dateOfBirth", *updatedUser.DateOfBirth})
+	}
+	if updatedUser.OwnedFoodTrucks != nil {
+		updateData = append(updateData, bson.E{"ownedFoodTrucks", updatedUser.OwnedFoodTrucks})
+	}
+	if updatedUser.Favorites != nil {
+		updateData = append(updateData, bson.E{"favorites", updatedUser.Favorites})
+	}
+	if updatedUser.Reviews != nil {
+		updateData = append(updateData, bson.E{"reviews", updatedUser.Reviews})
+	}
+
+	// Update food truck document
+	update := bson.D{
+		{"$set", updateData},
+	}
+
+	_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), update)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Send response
+	w.WriteHeader(http.StatusOK)
+
+}
+
+}
+
