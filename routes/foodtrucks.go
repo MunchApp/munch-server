@@ -144,6 +144,29 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(addedFoodTruck.ID))
 }
 
+func GetFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
+	// Get food truck id from route params
+	params := mux.Vars(r)
+	foodTruckID, foodTruckIDExists := params["foodTruckID"]
+	if !foodTruckIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get food truck from database
+	var foodTruck models.JSONFoodTruck
+	err := Db.Collection("foodTrucks").FindOne(r.Context(), queries.WithID(foodTruckID)).Decode(&foodTruck)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(foodTruck)
+}
+
 func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")

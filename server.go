@@ -21,6 +21,7 @@ func main() {
 	router.HandleFunc("/register", routes.PostRegisterHandler).Methods("POST")
 	router.HandleFunc("/login", routes.PostLoginHandler).Methods("POST")
 	router.HandleFunc("/foodtrucks", routes.GetFoodTrucksHandler).Methods("GET")
+	router.HandleFunc("/foodtrucks/{foodTruckID}", routes.GetFoodTruckHandler).Methods("GET")
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/reviews/foodtruck/{foodTruckID}", routes.GetReviewsOfFoodTruckHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
