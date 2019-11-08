@@ -37,19 +37,18 @@ type registerRequest struct {
 }
 
 type updateUserRequest struct {
-	PasswordHash []byte
-	NameFirst 	*string `json:"firstName"`
-	NameLast 	*string `json:"lastName"`
-	Email 		*string `json:"email"`
-	PhoneNumber *string `json:"phoneNumber"`
-	City 		*string `json:"city"`
-	State 		*string `json:"state"`
-	DateOfBirth *time.Time `json:"dateOfBirth"`
-	OwnedFoodTrucks []string `json:"ownedFoodTrucks"`
-	Favorites 	[]string `json:"favorites"`
-	Reviews 	[]string `json:"reviews"`
+	PasswordHash    []byte
+	NameFirst       *string    `json:"firstName"`
+	NameLast        *string    `json:"lastName"`
+	Email           *string    `json:"email"`
+	PhoneNumber     *string    `json:"phoneNumber"`
+	City            *string    `json:"city"`
+	State           *string    `json:"state"`
+	DateOfBirth     *time.Time `json:"dateOfBirth"`
+	OwnedFoodTrucks []string   `json:"ownedFoodTrucks"`
+	Favorites       []string   `json:"favorites"`
+	Reviews         []string   `json:"reviews"`
 }
-
 
 // PostRegisterHandler handles the logic for registering a user
 func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -263,7 +262,7 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 	// Checks for food truck ID
 	params := mux.Vars(r)
 	userID, userIDExists := params["userID"]
@@ -271,7 +270,7 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	// Get user from context
 	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
@@ -280,7 +279,6 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-
 
 	userDecoder := json.NewDecoder(r.Body)
 	userDecoder.DisallowUnknownFields()
@@ -342,6 +340,3 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 }
-
-}
-
