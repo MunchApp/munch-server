@@ -30,7 +30,7 @@ type updateFoodTruckRequest struct {
 	Name        string       `json:"name"`
 	Address     string       `json:"address"`
 	Location    [2]float64   `json:"location"`
-	Status      bool         `json:"status"`
+	Status      *bool        `json:"status"`
 	Hours       [7][2]string `json:"hours"`
 	Photos      []string     `json:"photos"`
 	Website     string       `json:"website"`
@@ -244,7 +244,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	if len(currentFoodTruck.Location) != 0 {
 		updateData = append(updateData, bson.E{"location", currentFoodTruck.Location})
 	}
-	if currentFoodTruck.Status != false || currentFoodTruck.Status != true {
+	if currentFoodTruck.Status != nil {
 		updateData = append(updateData, bson.E{"status", currentFoodTruck.Status})
 	}
 	// Validate hours if updating

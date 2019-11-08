@@ -22,8 +22,8 @@ func TestMain(m *testing.M) {
 	// Inject db to tests
 	tests.Db = Db
 
+	tests.ClearDB()
 	code := m.Run()
 
-	tests.ClearDB()
 	os.Exit(code)
 }
