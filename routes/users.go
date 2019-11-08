@@ -131,7 +131,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create a JWT for the user that expires in 15 minutes
 	claims := jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+		ExpiresAt: time.Now().Add(time.Hour * 24 * 60).Unix(),
 		Subject:   user.ID,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
