@@ -30,7 +30,7 @@ type updateFoodTruckRequest struct {
 	Name        string       `json:"name"`
 	Address     string       `json:"address"`
 	Location    [2]float64   `json:"location"`
-	Status      bool         `json:"status"`
+	Status      *bool        `json:"status"`
 	Hours       [7][2]string `json:"hours"`
 	Photos      []string     `json:"photos"`
 	Website     string       `json:"website"`
@@ -144,6 +144,29 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(addedFoodTruck.ID))
 }
 
+func GetFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
+	// Get food truck id from route params
+	params := mux.Vars(r)
+	foodTruckID, foodTruckIDExists := params["foodTruckID"]
+	if !foodTruckIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get food truck from database
+	var foodTruck models.JSONFoodTruck
+	err := Db.Collection("foodTrucks").FindOne(r.Context(), queries.WithID(foodTruckID)).Decode(&foodTruck)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(foodTruck)
+}
+
 func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
@@ -221,7 +244,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	if len(currentFoodTruck.Location) != 0 {
 		updateData = append(updateData, bson.E{"location", currentFoodTruck.Location})
 	}
-	if currentFoodTruck.Status != false || currentFoodTruck.Status != true {
+	if currentFoodTruck.Status != nil {
 		updateData = append(updateData, bson.E{"status", currentFoodTruck.Status})
 	}
 	// Validate hours if updating
