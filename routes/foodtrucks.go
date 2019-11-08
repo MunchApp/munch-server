@@ -138,10 +138,8 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send response
-	w.WriteHeader(http.StatusOK)
-
-	// Return food truck ID
-	w.Write([]byte(addedFoodTruck.ID))
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(addedFoodTruck)
 }
 
 func GetFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
@@ -205,7 +203,7 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		foodTrucks = make([]models.JSONFoodTruck, 0)
 	}
 
-	// Convert users to json
+	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(foodTrucks)
 }

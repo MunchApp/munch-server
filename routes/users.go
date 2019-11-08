@@ -23,7 +23,8 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	Token string `json:"token"`
+	Token string          `json:"token"`
+	User  models.JSONUser `json:"userObject"`
 }
 
 type registerRequest struct {
@@ -143,18 +144,12 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create the response
-	resp, err := json.Marshal(loginResponse{
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(loginResponse{
 		Token: jwtString,
+		User:  user,
 	})
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
 }
 
 func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
