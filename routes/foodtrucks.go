@@ -27,18 +27,6 @@ type addFoodTruckRequest struct {
 }
 
 type updateFoodTruckRequest struct {
-<<<<<<< HEAD
-	Name        string       `json:"name"`
-	Address     string       `json:"address"`
-	Location    [2]float64   `json:"location"`
-	Status      *bool        `json:"status"`
-	Hours       [7][2]string `json:"hours"`
-	Photos      []string     `json:"photos"`
-	Website     string       `json:"website"`
-	PhoneNumber string       `json:"phoneNumber"`
-	Description string       `json:"description"`
-	Tags        []string     `json:"tags"`
-=======
 	Name        *string       `json:"name"`
 	Address     *string       `json:"address"`
 	Location    *[2]float64   `json:"location"`
@@ -49,7 +37,6 @@ type updateFoodTruckRequest struct {
 	PhoneNumber *string       `json:"phoneNumber"`
 	Description *string       `json:"description"`
 	Tags        *[]string     `json:"tags"`
->>>>>>> Changed all updatedFoodTruck struct values to pointers, check field through nil
 }
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
@@ -231,18 +218,6 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	}
-
-	// Set tags to an empty array if they don't exist
-	tags := currentFoodTruck.Tags
-	if tags == nil {
-		*tags = []string{}
-	}
-
-	// Set photos to an empty array if they don't exist
-	photos := currentFoodTruck.Photos
-	if photos == nil {
-		*photos = []string{}
 	}
 
 	// Determine which fields should be updated
