@@ -110,7 +110,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Make sure all fields in request are provided
 	if login.Email == nil ||
 		login.Password == nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 

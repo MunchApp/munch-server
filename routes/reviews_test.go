@@ -11,8 +11,7 @@ import (
 )
 
 func TestReviewsOfFoodTruckGetInvalidID(t *testing.T) {
-	tests.ClearDB()
-	req, _ := http.NewRequest("GET", "/reviews/foodtruck/", nil)
+	req, _ := http.NewRequest("GET", "/reviews/foodtruck", nil)
 	vars := map[string]string{
 		"foodTruckID": "invalid-id",
 	}
@@ -28,8 +27,7 @@ func TestReviewsOfFoodTruckGetInvalidID(t *testing.T) {
 }
 
 func TestReviewsOfFoodTruckGetInvalid(t *testing.T) {
-	tests.ClearDB()
-	req, _ := http.NewRequest("GET", "/reviews/foodtruck/", nil)
+	req, _ := http.NewRequest("GET", "/reviews/foodtruck", nil)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(GetReviewsOfFoodTruckHandler)
 	handler.ServeHTTP(rr, req)
@@ -53,7 +51,7 @@ func TestReviewsOfFoodTruckGetValid(t *testing.T) {
 	tests.AddFoodTruck(testFoodTruck)
 	tests.AddReview(testReview)
 
-	req, _ := http.NewRequest("GET", "/reviews/foodtruck/", nil)
+	req, _ := http.NewRequest("GET", "/reviews/foodtruck", nil)
 	vars := map[string]string{
 		"foodTruckID": "test",
 	}

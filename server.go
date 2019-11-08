@@ -25,10 +25,10 @@ func main() {
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/reviews/foodtruck/{foodTruckID}", routes.GetReviewsOfFoodTruckHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
+	router.HandleFunc("/users/{userID}", routes.GetUserHandler).Methods("GET")
 
 	// Auth required routes
 	router.Use(middleware.AuthenticateUser)
-	router.HandleFunc("/users/{userID}", routes.GetUserHandler).Methods("GET")
 	router.HandleFunc("/profile", routes.GetProfileHandler).Methods("GET")
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
 	router.HandleFunc("/reviews", routes.PostReviewsHandler).Methods("POST")
