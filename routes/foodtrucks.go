@@ -32,11 +32,11 @@ type updateFoodTruckRequest struct {
 	Location    *[2]float64   `json:"location"`
 	Status      *bool         `json:"status"`
 	Hours       *[7][2]string `json:"hours"`
-	Photos      *[]string     `json:"photos"`
+	Photos      []string      `json:"photos"`
 	Website     *string       `json:"website"`
 	PhoneNumber *string       `json:"phoneNumber"`
 	Description *string       `json:"description"`
-	Tags        *[]string     `json:"tags"`
+	Tags        []string      `json:"tags"`
 }
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
@@ -258,7 +258,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		updateData = append(updateData, bson.E{"hours", *currentFoodTruck.Hours})
 	}
 	if currentFoodTruck.Photos != nil {
-		updateData = append(updateData, bson.E{"photos", *currentFoodTruck.Photos})
+		updateData = append(updateData, bson.E{"photos", currentFoodTruck.Photos})
 	}
 	if currentFoodTruck.Website != nil {
 		updateData = append(updateData, bson.E{"website", *currentFoodTruck.Website})
@@ -270,7 +270,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		updateData = append(updateData, bson.E{"description", *currentFoodTruck.Description})
 	}
 	if currentFoodTruck.Tags != nil {
-		updateData = append(updateData, bson.E{"tags", *currentFoodTruck.Tags})
+		updateData = append(updateData, bson.E{"tags", currentFoodTruck.Tags})
 	}
 
 	// Update food truck document
