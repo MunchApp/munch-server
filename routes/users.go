@@ -37,17 +37,14 @@ type registerRequest struct {
 }
 
 type updateUserRequest struct {
-	PasswordHash    []byte
-	NameFirst       *string    `json:"firstName"`
-	NameLast        *string    `json:"lastName"`
-	Email           *string    `json:"email"`
-	PhoneNumber     *string    `json:"phoneNumber"`
-	City            *string    `json:"city"`
-	State           *string    `json:"state"`
-	DateOfBirth     *time.Time `json:"dateOfBirth"`
-	OwnedFoodTrucks []string   `json:"ownedFoodTrucks"`
-	Favorites       []string   `json:"favorites"`
-	Reviews         []string   `json:"reviews"`
+	NameFirst   *string    `json:"firstName"`
+	NameLast    *string    `json:"lastName"`
+	Email       *string    `json:"email"`
+	PhoneNumber *string    `json:"phoneNumber"`
+	City        *string    `json:"city"`
+	State       *string    `json:"state"`
+	DateOfBirth *time.Time `json:"dateOfBirth"`
+	Favorites   []string   `json:"favorites"`
 }
 
 // PostRegisterHandler handles the logic for registering a user
@@ -316,14 +313,8 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if updatedUser.DateOfBirth != nil {
 		updateData = append(updateData, bson.E{"dateOfBirth", *updatedUser.DateOfBirth})
 	}
-	if updatedUser.OwnedFoodTrucks != nil {
-		updateData = append(updateData, bson.E{"ownedFoodTrucks", updatedUser.OwnedFoodTrucks})
-	}
 	if updatedUser.Favorites != nil {
 		updateData = append(updateData, bson.E{"favorites", updatedUser.Favorites})
-	}
-	if updatedUser.Reviews != nil {
-		updateData = append(updateData, bson.E{"reviews", updatedUser.Reviews})
 	}
 
 	// Update food truck document
