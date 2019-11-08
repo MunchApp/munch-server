@@ -27,6 +27,7 @@ type addFoodTruckRequest struct {
 }
 
 type updateFoodTruckRequest struct {
+<<<<<<< HEAD
 	Name        string       `json:"name"`
 	Address     string       `json:"address"`
 	Location    [2]float64   `json:"location"`
@@ -37,6 +38,18 @@ type updateFoodTruckRequest struct {
 	PhoneNumber string       `json:"phoneNumber"`
 	Description string       `json:"description"`
 	Tags        []string     `json:"tags"`
+=======
+	Name        *string       `json:"name"`
+	Address     *string       `json:"address"`
+	Location    *[2]float64   `json:"location"`
+	Status      *bool         `json:"status"`
+	Hours       *[7][2]string `json:"hours"`
+	Photos      *[]string     `json:"photos"`
+	Website     *string       `json:"website"`
+	PhoneNumber *string       `json:"phoneNumber"`
+	Description *string       `json:"description"`
+	Tags        *[]string     `json:"tags"`
+>>>>>>> Changed all updatedFoodTruck struct values to pointers, check field through nil
 }
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
@@ -223,32 +236,32 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Set tags to an empty array if they don't exist
 	tags := currentFoodTruck.Tags
 	if tags == nil {
-		tags = []string{}
+		*tags = []string{}
 	}
 
 	// Set photos to an empty array if they don't exist
 	photos := currentFoodTruck.Photos
 	if photos == nil {
-		photos = []string{}
+		*photos = []string{}
 	}
 
 	// Determine which fields should be updated
 	var updateData bson.D
 
-	if currentFoodTruck.Name != "" {
-		updateData = append(updateData, bson.E{"name", currentFoodTruck.Name})
+	if currentFoodTruck.Name != nil {
+		updateData = append(updateData, bson.E{"name", *currentFoodTruck.Name})
 	}
-	if currentFoodTruck.Address != "" {
-		updateData = append(updateData, bson.E{"address", currentFoodTruck.Address})
+	if currentFoodTruck.Address != nil {
+		updateData = append(updateData, bson.E{"address", *currentFoodTruck.Address})
 	}
-	if len(currentFoodTruck.Location) != 0 {
-		updateData = append(updateData, bson.E{"location", currentFoodTruck.Location})
+	if currentFoodTruck.Location != nil {
+		updateData = append(updateData, bson.E{"location", *currentFoodTruck.Location})
 	}
 	if currentFoodTruck.Status != nil {
-		updateData = append(updateData, bson.E{"status", currentFoodTruck.Status})
+		updateData = append(updateData, bson.E{"status", *currentFoodTruck.Status})
 	}
 	// Validate hours if updating
-	if currentFoodTruck.Hours[0][0] != "" {
+	if currentFoodTruck.Hours != nil {
 		for i := 0; i < 7; i++ {
 			validOpenTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, currentFoodTruck.Hours[i][0])
 			if err != nil {
@@ -267,22 +280,22 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		updateData = append(updateData, bson.E{"hours", currentFoodTruck.Hours})
+		updateData = append(updateData, bson.E{"hours", *currentFoodTruck.Hours})
 	}
 	if currentFoodTruck.Photos != nil {
-		updateData = append(updateData, bson.E{"photos", photos})
+		updateData = append(updateData, bson.E{"photos", *currentFoodTruck.Photos})
 	}
-	if currentFoodTruck.Website != "" {
-		updateData = append(updateData, bson.E{"website", currentFoodTruck.Website})
+	if currentFoodTruck.Website != nil {
+		updateData = append(updateData, bson.E{"website", *currentFoodTruck.Website})
 	}
-	if currentFoodTruck.PhoneNumber != "" {
-		updateData = append(updateData, bson.E{"phoneNumber", currentFoodTruck.PhoneNumber})
+	if currentFoodTruck.PhoneNumber != nil {
+		updateData = append(updateData, bson.E{"phoneNumber", *currentFoodTruck.PhoneNumber})
 	}
-	if currentFoodTruck.Description != "" {
-		updateData = append(updateData, bson.E{"description", currentFoodTruck.Description})
+	if currentFoodTruck.Description != nil {
+		updateData = append(updateData, bson.E{"description", *currentFoodTruck.Description})
 	}
-	if len(currentFoodTruck.Tags) != 0 {
-		updateData = append(updateData, bson.E{"tags", tags})
+	if currentFoodTruck.Tags != nil {
+		updateData = append(updateData, bson.E{"tags", *currentFoodTruck.Tags})
 	}
 
 	// Update food truck document
