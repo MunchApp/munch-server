@@ -39,7 +39,7 @@ func GetPort() string {
 	// Find port from env var or default to 80
 	port, exists := os.LookupEnv("PORT")
 	if !exists {
-		port = "80"
+		port = "8070"
 	}
 	return port
 }

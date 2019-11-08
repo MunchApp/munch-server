@@ -25,6 +25,7 @@ func main() {
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/reviews/foodtruck/{foodTruckID}", routes.GetReviewsOfFoodTruckHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
+	router.HandleFunc("/users", routes.PutUpdateUserHandler).Methods("PUT")
 
 	// Auth required routes
 	router.Use(middleware.AuthenticateUser)
@@ -32,6 +33,7 @@ func main() {
 	router.HandleFunc("/profile", routes.GetProfileHandler).Methods("GET")
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
 	router.HandleFunc("/reviews", routes.PostReviewsHandler).Methods("POST")
+	//router.HandleFunc("/users/{userID}", routes.PutUpdateUserHandler).Methods("PUT")
 	router.HandleFunc("/foodtrucks/{foodTruckID}", routes.PutFoodTrucksHandler).Methods("PUT")
 
 	// Connect to MongoDB
