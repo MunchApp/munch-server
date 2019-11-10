@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"munchserver/models"
@@ -156,4 +157,164 @@ func TestReviewsOfFoodTruckGetValidWithoutReview(t *testing.T) {
 	if len(reviews) != 0 {
 		t.Errorf("getting reviews of valid food truck expected 0 elements, but got %v", len(reviews))
 	}
+}
+
+func TestReviewsPostUnauthorized(t *testing.T) {
+	tests.ClearDB()
+
+	reviewsRequest := newReviewRequest{}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PostReviewsHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusUnauthorized
+	if rr.Code != expected {
+		t.Errorf("adding review while unauthroized expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestReviewsPostInvalidRequestClient(t *testing.T) {
+	tests.ClearDB()
+
+	reviewsRequest := newReviewRequest{
+		Comment: "Amazing food",
+	}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostReviewsHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid body expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestReviewsPostInvalidRequestScraper(t *testing.T) {
+	tests.ClearDB()
+
+	reviewsRequest := newReviewRequest{
+		Comment: "Amazing food",
+	}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	req.Header.Set("User-Agent", "MunchCritic/1.0")
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PostReviewsHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("adding review as scraper with invalid body expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestReviewsPostInvalidFoodTruck(t *testing.T) {
+	tests.ClearDB()
+
+	var rating float32 = 5.0
+	name := "invalid-truck"
+	reviewsRequest := newReviewRequest{
+		FoodTruck: &name,
+		Comment:   "Amazing food",
+		Rating:    &rating,
+	}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostReviewsHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusNotFound
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestReviewsPostValidClient(t *testing.T) {
+	tests.ClearDB()
+
+	tests.AddFoodTruck(models.JSONFoodTruck{
+		ID:      "testfoodtruck",
+		Reviews: []string{},
+	})
+	tests.AddUser(models.JSONUser{
+		ID:      "testuser",
+		Reviews: []string{},
+	})
+
+	var rating float32 = 5.0
+	name := "testfoodtruck"
+	reviewsRequest := newReviewRequest{
+		FoodTruck: &name,
+		Comment:   "Amazing food",
+		Rating:    &rating,
+	}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostReviewsHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	updatedFoodTruck := tests.GetFoodTruck("testfoodtruck")
+	if updatedFoodTruck == nil || len(updatedFoodTruck.Reviews) != 1 {
+		t.Error("adding valid review did not update food truck")
+	}
+
+	updatedUser := tests.GetUser("testuser")
+	if updatedUser == nil || len(updatedUser.Reviews) != 1 {
+		t.Error("adding valid review did not update user")
+	}
+
+	// TODO: Add test to make sure review exists after #29/#44 is merged
+}
+
+func TestReviewsPostValidScraper(t *testing.T) {
+	tests.ClearDB()
+
+	tests.AddFoodTruck(models.JSONFoodTruck{
+		ID:      "testfoodtruck",
+		Reviews: []string{},
+	})
+	var rating float32 = 5.0
+	name := "testfoodtruck"
+	reviewsRequest := newReviewRequest{
+		ReviewerName: "Test User",
+		FoodTruck:    &name,
+		Comment:      "Amazing food",
+		Rating:       &rating,
+		Origin:       "Yelp",
+	}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	req.Header.Set("User-Agent", "MunchCritic/1.0")
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PostReviewsHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	updatedFoodTruck := tests.GetFoodTruck("testfoodtruck")
+	if updatedFoodTruck == nil || len(updatedFoodTruck.Reviews) != 1 {
+		t.Error("adding valid review did not update food truck")
+	}
+
+	// TODO: Add test to make sure review exists after #29/#44 is merged
 }

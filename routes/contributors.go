@@ -9,20 +9,20 @@ import (
 
 type ContributorResponse struct {
 	Username      string `json:"Login"`
-	Contributions int    `json:"contributions`
+	Contributions int    `json:"contributions"`
 }
 
 type ReturnResponse struct {
-	Username      string `json: "login"`
+	Username      string `json:"login"`
 	Contributions int    `json:"contributions"`
 	Issues        int
 }
 
 type IssueResponse struct {
 	User struct {
-		Login string `json: "login"`
-	} `json: "user"`
-	IssueNumber int `json: "number"`
+		Login string `json:"login"`
+	} `json:"user"`
+	IssueNumber int `json:"number"`
 }
 
 func GetContributorsHandler(w http.ResponseWriter, r *http.Request) {

@@ -53,6 +53,12 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Lookup food truck
+	var foodTruck models.JSONFoodTruck
+	err = Db.Collection("foodTrucks").FindOne(r.Context(), queries.WithID(*newReview.FoodTruck)).Decode(&foodTruck)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	// Generate uuid for food truck
 	uuid, err := uuid.NewRandom()

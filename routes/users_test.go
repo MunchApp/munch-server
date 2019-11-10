@@ -224,6 +224,7 @@ func TestRegisterPostDuplicate(t *testing.T) {
 	}
 }
 
+// This test also tests the JWT and auth middleware
 func TestProfileGetAuthorized(t *testing.T) {
 	tests.ClearDB()
 
