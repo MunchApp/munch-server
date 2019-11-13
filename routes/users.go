@@ -230,13 +230,13 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user from context
-	// _, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
-	// // Check for a user
-	// if !userLoggedIn {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// }
+	// Check for a user
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	userDecoder := json.NewDecoder(r.Body)
 	userDecoder.DisallowUnknownFields()
@@ -288,7 +288,7 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), update)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("ERROR: %v", err)
 	}
 
 	// Send response
