@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"munchserver/middleware"
 	"munchserver/models"
@@ -176,16 +177,19 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	nameParam := r.URL.Query().Get("name")
 	if nameParam != "" {
+		fmt.Println("-- name param: %v", nameParam)
 		filter = append(filter, bson.E{"name", nameParam})
 	}
 
 	tagsParam := r.URL.Query()["tags"]
 	if len(tagsParam) != 0 {
+		fmt.Println("-- tags param: %v", tagsParam)
 		filter = append(filter, bson.E{"tags", bson.E{"$in", tagsParam}})
 	}
 
 	addressParam := r.URL.Query().Get("address")
 	if addressParam != "" {
+		fmt.Println("-- address param: %v", addressParam)
 		filter = append(filter, bson.E{"address", addressParam})
 	}
 
