@@ -33,7 +33,7 @@ func main() {
 	router.HandleFunc("/profile", routes.GetProfileHandler).Methods("GET")
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
 	router.HandleFunc("/reviews", routes.PostReviewsHandler).Methods("POST")
-	router.HandleFunc("/user/favorite/{foodTruckID}", routes.PutFavoriteHandler).Methods("PUT")
+	router.HandleFunc("/users/favorite/{foodTruckID}", routes.PutFavoriteHandler).Methods("PUT")
 	router.HandleFunc("/users/{userID}", routes.PutUpdateUserHandler).Methods("PUT")
 	router.HandleFunc("/foodtrucks/{foodTruckID}", routes.PutFoodTrucksHandler).Methods("PUT")
 

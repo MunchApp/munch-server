@@ -39,7 +39,6 @@ type registerRequest struct {
 type updateUserRequest struct {
 	NameFirst   *string    `json:"firstName"`
 	NameLast    *string    `json:"lastName"`
-	Email       *string    `json:"email"`
 	PhoneNumber *string    `json:"phoneNumber"`
 	City        *string    `json:"city"`
 	State       *string    `json:"state"`
@@ -298,9 +297,6 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if updatedUser.NameLast != nil {
 		updateData = append(updateData, bson.E{"lastName", *updatedUser.NameLast})
 	}
-	if updatedUser.Email != nil {
-		updateData = append(updateData, bson.E{"email", *updatedUser.Email})
-	}
 	if updatedUser.PhoneNumber != nil {
 		updateData = append(updateData, bson.E{"phoneNumber", *updatedUser.PhoneNumber})
 	}
@@ -324,7 +320,7 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), update)
 	if err != nil {
-		log.Printf("ERROR %v", http.StatusInternalServerError)
+		log.Printf("ERROR: %v", err)
 	}
 
 	// Send response
