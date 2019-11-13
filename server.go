@@ -25,6 +25,7 @@ func main() {
 	router.HandleFunc("/reviews", routes.GetReviewsHandler).Methods("GET")
 	router.HandleFunc("/reviews/foodtruck/{foodTruckID}", routes.GetReviewsOfFoodTruckHandler).Methods("GET")
 	router.HandleFunc("/contributors", routes.GetContributorsHandler).Methods("GET")
+	router.HandleFunc("/foodtrucks/distance/{distID}", routes.GetTruckByDistanceHandler).Methods("GET")
 
 	// Auth required routes
 	router.Use(middleware.AuthenticateUser)

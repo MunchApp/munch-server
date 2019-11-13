@@ -189,6 +189,15 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(foodTrucks)
 }
 
+/***
+	Get all food trucks
+	Sort by distance
+	Return closest 5-10 food trucks
+***/
+func GetTruckByDistanceHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Checks for food truck ID
