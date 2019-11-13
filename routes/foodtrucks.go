@@ -170,7 +170,26 @@ func GetFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
-	cur, err := foodTrucksCollection.Find(r.Context(), bson.D{})
+
+	// Create correct filter
+	filter := bson.D{}
+
+	nameParam := r.URL.Query().Get("name")
+	if nameParam != "" {
+		filter = append(filter, bson.E{"name", nameParam})
+	}
+
+	tagsParam := r.URL.Query()["tags"]
+	if len(tagsParam) != 0 {
+		filter = append(filter, bson.E{"tags", bson.E{"$in", tagsParam}})
+	}
+
+	addressParam := r.URL.Query().Get("address")
+	if addressParam != "" {
+		filter = append(filter, bson.E{"address", addressParam})
+	}
+
+	cur, err := foodTrucksCollection.Find(r.Context(), filter)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
