@@ -34,7 +34,7 @@ func main() {
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
 	router.HandleFunc("/reviews", routes.PostReviewsHandler).Methods("POST")
 	router.HandleFunc("/users/favorite/{foodTruckID}", routes.PutFavoriteHandler).Methods("PUT")
-	router.HandleFunc("/users/{userID}", routes.PutUpdateUserHandler).Methods("PUT")
+	router.HandleFunc("/users", routes.PutUpdateUserHandler).Methods("PUT")
 	router.HandleFunc("/foodtrucks/{foodTruckID}", routes.PutFoodTrucksHandler).Methods("PUT")
 
 	// Connect to MongoDB

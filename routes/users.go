@@ -43,7 +43,6 @@ type updateUserRequest struct {
 	City        *string    `json:"city"`
 	State       *string    `json:"state"`
 	DateOfBirth *time.Time `json:"dateOfBirth"`
-	Favorites   []string   `json:"favorites"`
 }
 
 // PostRegisterHandler handles the logic for registering a user
@@ -259,16 +258,8 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Checks for food truck ID
-	params := mux.Vars(r)
-	userID, userIDExists := params["userID"]
-	if !userIDExists {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	// Get user from context
-	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+	userID, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
 	// Check for a user
 	if !userLoggedIn {
@@ -309,9 +300,6 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if updatedUser.DateOfBirth != nil {
 		updateData = append(updateData, bson.E{"dateOfBirth", *updatedUser.DateOfBirth})
 	}
-	if updatedUser.Favorites != nil {
-		updateData = append(updateData, bson.E{"favorites", updatedUser.Favorites})
-	}
 
 	// Update food truck document
 	update := bson.D{
@@ -321,6 +309,7 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), update)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	// Send response
