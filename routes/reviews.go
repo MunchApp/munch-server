@@ -113,7 +113,8 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send response
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(addedReview)
 }
 
 func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +155,7 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 		reviews = make([]models.JSONReview, 0)
 	}
 
-	// Convert reviews to json
+	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(reviews)
 }
@@ -176,7 +177,7 @@ func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
 		reviews = make([]models.JSONReview, 0)
 	}
 
-	// Convert reviews to json
+	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(reviews)
 }
