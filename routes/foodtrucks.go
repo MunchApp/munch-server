@@ -218,14 +218,14 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user from context
-	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+	// // Get user from context
+	// _, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
 
-	// Check for a user
-	if !userLoggedIn {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	// // Check for a user
+	// if !userLoggedIn {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// }
 
 	foodTruckDecoder := json.NewDecoder(r.Body)
 	foodTruckDecoder.DisallowUnknownFields()
