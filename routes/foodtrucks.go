@@ -18,7 +18,7 @@ import (
 type addFoodTruckRequest struct {
 	Name        *string       `json:"name"`
 	Address     *string       `json:"address"`
-	Location    [2]float64    `json:"location"`
+	Location    *[2]float64   `json:"location"`
 	Hours       *[7][2]string `json:"hours"`
 	Photos      *[]string     `json:"photos"`
 	Website     string        `json:"website"`
@@ -65,6 +65,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Make sure required fields are set
 	if newFoodTruck.Name == nil ||
 		newFoodTruck.Address == nil ||
+		newFoodTruck.Location == nil ||
 		newFoodTruck.Hours == nil ||
 		newFoodTruck.Photos == nil {
 		w.WriteHeader(http.StatusBadRequest)
