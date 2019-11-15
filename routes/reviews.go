@@ -3,9 +3,9 @@ package routes
 import (
 	"encoding/json"
 	"log"
+	"munchserver/dbutils"
 	"munchserver/middleware"
 	"munchserver/models"
-	"munchserver/queries"
 	"net/http"
 	"time"
 
@@ -54,13 +54,17 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Lookup food truck
 	var foodTruck models.JSONFoodTruck
-	err = Db.Collection("foodTrucks").FindOne(r.Context(), queries.WithID(*newReview.FoodTruck)).Decode(&foodTruck)
+	err = Db.Collection("foodTrucks").FindOne(r.Context(), dbutils.WithIDQuery(*newReview.FoodTruck)).Decode(&foodTruck)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	// Generate uuid for food truck
+	// Calculate rating sum to determine new avg rating, the new avg rating will be (that sum + review's rating) / new number of reviews
+	ratingSum := float32(len(foodTruck.Reviews)) * foodTruck.AvgRating
+	newAvgRating := (ratingSum + *newReview.Rating) / float32(len(foodTruck.Reviews)+1)
+
+	// Generate uuid for review
 	uuid, err := uuid.NewRandom()
 	if err != nil {
 		log.Printf("ERROR: %v", err)
@@ -102,7 +106,7 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Attach review to user
 	if userLoggedIn {
-		_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(user), queries.PushReview(uuid.String()))
+		_, err = Db.Collection("users").UpdateOne(r.Context(), dbutils.WithIDQuery(user), dbutils.PushReview(uuid.String()))
 		if err != nil {
 			log.Printf("ERROR: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -111,7 +115,7 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Attach review to food truck
-	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), queries.WithID(*newReview.FoodTruck), queries.PushReview(uuid.String()))
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), dbutils.WithIDQuery(*newReview.FoodTruck), dbutils.UpdateFoodTruck(newAvgRating, uuid.String()))
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -138,7 +142,7 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 	// Check that food truck exists
 	var foodTruck models.JSONFoodTruck
 	foodTrucksCollection := Db.Collection("foodTrucks")
-	err := foodTrucksCollection.FindOne(r.Context(), queries.WithID(foodTruckID)).Decode(&foodTruck)
+	err := foodTrucksCollection.FindOne(r.Context(), dbutils.WithIDQuery(foodTruckID)).Decode(&foodTruck)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -147,7 +151,7 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get all reviews with foodtruck from the database into a cursor
 	reviewsCollection := Db.Collection("reviews")
-	cur, err := reviewsCollection.Find(r.Context(), queries.WithIDs(foodTruck.Reviews))
+	cur, err := reviewsCollection.Find(r.Context(), dbutils.WithIDsQuery(foodTruck.Reviews))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("ERROR: %v", err)

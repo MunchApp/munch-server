@@ -3,12 +3,13 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"munchserver/models"
 	"munchserver/tests"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/mux"
 )
 
 func TestReviewsGetEmpty(t *testing.T) {
@@ -242,8 +243,9 @@ func TestReviewsPostValidClient(t *testing.T) {
 	tests.ClearDB()
 
 	tests.AddFoodTruck(models.JSONFoodTruck{
-		ID:      "testfoodtruck",
-		Reviews: []string{},
+		ID:        "testfoodtruck",
+		Reviews:   []string{},
+		AvgRating: 0.0,
 	})
 	tests.AddUser(models.JSONUser{
 		ID:      "testuser",
@@ -273,13 +275,22 @@ func TestReviewsPostValidClient(t *testing.T) {
 	if updatedFoodTruck == nil || len(updatedFoodTruck.Reviews) != 1 {
 		t.Error("adding valid review did not update food truck")
 	}
+	if updatedFoodTruck.AvgRating != 5.0 {
+		t.Error("adding valid review did not update rating of food truck")
+	}
 
 	updatedUser := tests.GetUser("testuser")
 	if updatedUser == nil || len(updatedUser.Reviews) != 1 {
 		t.Error("adding valid review did not update user")
 	}
 
-	// TODO: Add test to make sure review exists after #29/#44 is merged
+	var addedReturnedReview models.JSONReview
+	json.NewDecoder(rr.Body).Decode(&addedReturnedReview)
+
+	addedReview := tests.GetReview(addedReturnedReview.ID)
+	if addedReview == nil {
+		t.Error("adding valid review did not add review to db")
+	}
 }
 
 func TestReviewsPostValidScraper(t *testing.T) {
@@ -316,5 +327,52 @@ func TestReviewsPostValidScraper(t *testing.T) {
 		t.Error("adding valid review did not update food truck")
 	}
 
-	// TODO: Add test to make sure review exists after #29/#44 is merged
+	var addedReturnedReview models.JSONReview
+	json.NewDecoder(rr.Body).Decode(&addedReturnedReview)
+
+	addedReview := tests.GetReview(addedReturnedReview.ID)
+	if addedReview == nil {
+		t.Error("adding valid review did not add review to db")
+	}
+}
+
+func TestReviewsPostNewRating(t *testing.T) {
+	tests.ClearDB()
+
+	tests.AddFoodTruck(models.JSONFoodTruck{
+		ID:        "testfoodtruck",
+		Reviews:   []string{"fakereview"},
+		AvgRating: 4.0,
+	})
+	tests.AddUser(models.JSONUser{
+		ID:      "testuser",
+		Reviews: []string{},
+	})
+
+	var rating float32 = 5.0
+	name := "testfoodtruck"
+	reviewsRequest := newReviewRequest{
+		FoodTruck: &name,
+		Comment:   "Amazing food",
+		Rating:    &rating,
+	}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostReviewsHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	updatedFoodTruck := tests.GetFoodTruck("testfoodtruck")
+	if updatedFoodTruck == nil || len(updatedFoodTruck.Reviews) != 2 {
+		t.Error("adding valid review did not update food truck")
+	}
+	if updatedFoodTruck.AvgRating != 4.5 {
+		t.Errorf("adding valid review did not update rating of food truck, expected %v but got %v", 4.5, updatedFoodTruck.AvgRating)
+	}
 }

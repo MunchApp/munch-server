@@ -2,8 +2,8 @@ package tests
 
 import (
 	"context"
+	"munchserver/dbutils"
 	"munchserver/models"
-	"munchserver/queries"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -11,9 +11,9 @@ import (
 var Db *mongo.Database
 
 func ClearDB() {
-	_, _ = Db.Collection("users").DeleteMany(context.TODO(), queries.All())
-	_, _ = Db.Collection("foodTrucks").DeleteMany(context.TODO(), queries.All())
-	_, _ = Db.Collection("reviews").DeleteMany(context.TODO(), queries.All())
+	_, _ = Db.Collection("users").DeleteMany(context.TODO(), dbutils.AllQuery())
+	_, _ = Db.Collection("foodTrucks").DeleteMany(context.TODO(), dbutils.AllQuery())
+	_, _ = Db.Collection("reviews").DeleteMany(context.TODO(), dbutils.AllQuery())
 }
 
 func AddFoodTruck(foodTruck models.JSONFoodTruck) {
@@ -30,7 +30,7 @@ func AddUser(user models.JSONUser) {
 
 func GetUser(id string) *models.JSONUser {
 	var user models.JSONUser
-	err := Db.Collection("users").FindOne(context.TODO(), queries.WithID(id)).Decode(&user)
+	err := Db.Collection("users").FindOne(context.TODO(), dbutils.WithIDQuery(id)).Decode(&user)
 	if err != nil {
 		return nil
 	}
@@ -39,7 +39,7 @@ func GetUser(id string) *models.JSONUser {
 
 func GetFoodTruck(id string) *models.JSONFoodTruck {
 	var foodTruck models.JSONFoodTruck
-	err := Db.Collection("foodTrucks").FindOne(context.TODO(), queries.WithID(id)).Decode(&foodTruck)
+	err := Db.Collection("foodTrucks").FindOne(context.TODO(), dbutils.WithIDQuery(id)).Decode(&foodTruck)
 	if err != nil {
 		return nil
 	}
@@ -48,7 +48,7 @@ func GetFoodTruck(id string) *models.JSONFoodTruck {
 
 func GetReview(id string) *models.JSONReview {
 	var review models.JSONReview
-	err := Db.Collection("reviews").FindOne(context.TODO(), queries.WithID(id)).Decode(&review)
+	err := Db.Collection("reviews").FindOne(context.TODO(), dbutils.WithIDQuery(id)).Decode(&review)
 	if err != nil {
 		return nil
 	}
