@@ -96,6 +96,28 @@ func TestFoodTruckGetValid(t *testing.T) {
 		t.Errorf("expected food truck with id test, but got %v", foodTruck)
 	}
 }
+func TestFoodTrucksGetSearchValid(t *testing.T) {
+	tests.ClearDB()
+	addFoodTruck := models.JSONFoodTruck{
+		ID:   "test",
+		Name: "testTruck",
+	}
+	tests.AddFoodTruck(addFoodTruck)
+	req, _ := http.NewRequest("GET", "/foodtrucks?query=testTruck", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("getting valid food truck with name expected status code of %v, but got %v", expected, rr.Code)
+	}
+	var foodTruck []models.JSONFoodTruck
+	json.NewDecoder(rr.Body).Decode(&foodTruck)
+	if foodTruck[0].Name != "testTruck" {
+		t.Errorf("expected food truck with name testTruck, but got %v", foodTruck[0].Name)
+	}
+}
 
 func TestPostFoodTruckValid(t *testing.T) {
 	tests.ClearDB()
@@ -151,28 +173,6 @@ func TestPostFoodTruckValid(t *testing.T) {
 	updatedFoodTruck := tests.GetFoodTruck(addedFoodTruck.ID)
 	if updatedFoodTruck == nil || updatedFoodTruck.Name != "Luke's Coffee House" {
 		t.Error("Error finding the added food truck in the database.")
-	}
-}
-func TestFoodTrucksSearchValid(t *testing.T) {
-	tests.ClearDB()
-	addFoodTruck := models.JSONFoodTruck{
-		ID:   "test",
-		Name: "testTruck",
-	}
-	tests.AddFoodTruck(addFoodTruck)
-	req, _ := http.NewRequest("GET", "/foodtrucks?query=testTruck", nil)
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(GetFoodTrucksHandler)
-	handler.ServeHTTP(rr, req)
-
-	expected := http.StatusOK
-	if rr.Code != expected {
-		t.Errorf("getting valid food truck with name expected status code of %v, but got %v", expected, rr.Code)
-	}
-	var foodTruck []models.JSONFoodTruck
-	json.NewDecoder(rr.Body).Decode(&foodTruck)
-	if foodTruck[0].Name != "testTruck" {
-		t.Errorf("expected food truck with name testTruck, but got %v", foodTruck[0].Name)
 	}
 }
 
