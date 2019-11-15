@@ -183,14 +183,16 @@ func PutFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Printf("ERROR: Incorrect action to edit user favorites.")
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	updateFavesFilter := bson.M{updateOperator: bson.M{"favorites": foodTruckID}}
 
 	_, err := Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), updateFavesFilter)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 
 	// Send response
