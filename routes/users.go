@@ -13,6 +13,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -150,6 +151,53 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 		Token: jwtString,
 		User:  user,
 	})
+}
+
+func PutFavoriteHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Checks for food truck ID
+	params := mux.Vars(r)
+	foodTruckID, foodTruckIDExists := params["foodTruckID"]
+	if !foodTruckIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get user from context
+	userID, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user, or if the user agent is from the scraper
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var updateOperator string
+
+	// Determine if an add or delete
+	action := r.URL.Query().Get("action")
+	if action == "add" {
+		updateOperator = "$addToSet"
+	} else if action == "delete" {
+		updateOperator = "$pull"
+	} else {
+		log.Printf("ERROR: Incorrect action to edit user favorites.")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	updateFavesFilter := bson.M{updateOperator: bson.M{"favorites": foodTruckID}}
+
+	_, err := Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), updateFavesFilter)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Send response
+	w.WriteHeader(http.StatusOK)
+
 }
 
 func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
