@@ -118,7 +118,7 @@ func TestPostFoodTruckValid(t *testing.T) {
 		"https://s3-media2.fl.yelpcdn.com/bphoto/tUJ5gLnfRFhp_v-LUGj8Ww/o.jpg",
 	}
 	website := "www.google.com"
-	phone := "+18006729102"
+	phone := "8006729102"
 	description := "testDescription"
 	tags := []string{"food", "good food"}
 
@@ -175,7 +175,7 @@ func TestPostFoodTruckInvalidHours(t *testing.T) {
 		"https://s3-media2.fl.yelpcdn.com/bphoto/tUJ5gLnfRFhp_v-LUGj8Ww/o.jpg",
 	}
 	website := "www.google.com"
-	phone := "+18006729102"
+	phone := "8006729102"
 	description := "testDescription"
 	tags := []string{"food", "good food"}
 
@@ -220,7 +220,7 @@ func TestPostFoodTruckNoPhotos(t *testing.T) {
 		[2]string{"10:00", "11:00"},
 	}
 	website := "www.google.com"
-	phone := "+18006729102"
+	phone := "8006729102"
 	description := "testDescription"
 	tags := []string{"food", "good food"}
 
