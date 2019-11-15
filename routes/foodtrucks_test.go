@@ -102,7 +102,7 @@ func TestPostFoodTruckValid(t *testing.T) {
 
 	name := "Luke's Coffee House"
 	address := "2502 Nueces St\nAustin, TX 78705"
-	location := [2]float64{30.28793, -97.74731}
+	location := [2]float64{-97.74731, 30.28793}
 	hours := [7][2]string{
 		[2]string{"10:00", "11:00"},
 		[2]string{"10:00", "11:00"},
@@ -159,7 +159,7 @@ func TestPostFoodTruckInvalidHours(t *testing.T) {
 
 	name := "Luke's Coffee House"
 	address := "2502 Nueces St\nAustin, TX 78705"
-	location := [2]float64{30.28793, -97.74731}
+	location := [2]float64{-97.74731, 30.28793}
 	hours := [7][2]string{
 		[2]string{"10:00", "11:00"},
 		[2]string{"10:00", "11:00"},
@@ -209,7 +209,7 @@ func TestPostFoodTruckNoPhotos(t *testing.T) {
 
 	name := "Luke's Coffee House"
 	address := "2502 Nueces St\nAustin, TX 78705"
-	location := [2]float64{30.28793, -97.74731}
+	location := [2]float64{-97.74731, 30.28793}
 	hours := [7][2]string{
 		[2]string{"10:00", "11:00"},
 		[2]string{"10:00", "11:00"},
