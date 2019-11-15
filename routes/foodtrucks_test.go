@@ -395,7 +395,7 @@ func TestClaimFoodTruckPutUnauthorized(t *testing.T) {
 	}
 	req = mux.SetURLVars(req, vars)
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(PutClaimFoodTrucksHandler)
+	handler := http.HandlerFunc(PutClaimFoodTruckHandler)
 	handler.ServeHTTP(rr, req)
 
 	expected := http.StatusUnauthorized
