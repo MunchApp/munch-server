@@ -40,6 +40,7 @@ type JSONFoodTruck struct {
 	PhoneNumber string       `json:"phoneNumber" bson:"phoneNumber"`
 	Description string       `json:"description" bson:"description"`
 	Tags        []string     `json:"tags" bson:"tags"`
+	Distance    float64      `json:"distance" bson:"distance"`
 }
 
 func NewJSONFoodTruck(foodTruck FoodTruck) JSONFoodTruck {

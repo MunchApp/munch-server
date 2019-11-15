@@ -8,11 +8,13 @@ import (
 	"munchserver/models"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type addFoodTruckRequest struct {
@@ -172,6 +174,20 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
 
+	// Get location from query params
+	longitude, err := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	latitude, err := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	// Create correct filter
 	var filter bson.M
 
@@ -204,7 +220,18 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		filter = dbutils.AllQuery()
 	}
 
-	cur, err := foodTrucksCollection.Find(r.Context(), filter)
+	geoStage := bson.D{
+		{"$geoNear", bson.M{
+			"near": bson.M{
+				"type":        "Point",
+				"coordinates": []float64{longitude, latitude},
+			},
+			"distanceField": "distance",
+			"spherical":     true,
+			"query":         filter,
+		}},
+	}
+	cur, err := foodTrucksCollection.Aggregate(r.Context(), mongo.Pipeline{geoStage})
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
