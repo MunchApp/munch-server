@@ -170,23 +170,28 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	foodTrucksCollection := Db.Collection("foodTrucks")
 
 	// Create correct filter
-	filter := bson.D{}
+	var filter bson.D
 
 	nameParam := r.URL.Query().Get("name")
-	if nameParam != "" {
-		filter = append(filter, bson.E{"name", nameParam})
-	}
-
 	tagsParam := r.URL.Query()["tags"]
-	if len(tagsParam) != 0 {
-		var tagsFilter bson.D
-		tagsFilter = append(tagsFilter, bson.E{"$in", tagsParam})
-		filter = append(filter, bson.E{"tags", tagsFilter})
-	}
-
 	addressParam := r.URL.Query().Get("address")
-	if addressParam != "" {
-		filter = append(filter, bson.E{"address", addressParam})
+
+	if nameParam != "" && len(tagsParam) != 0 && addressParam != "" {
+		filter = bson.D{}
+	} else {
+		var paramsFilter bson.D
+		if nameParam != "" {
+			paramsFilter = append(paramsFilter, bson.E{"name", nameParam})
+		}
+		if len(tagsParam) != 0 {
+			var tagsFilter bson.D
+			tagsFilter = append(tagsFilter, bson.E{"$in", tagsParam})
+			paramsFilter = append(paramsFilter, bson.E{"tags", tagsFilter})
+		}
+		if addressParam != "" {
+			paramsFilter = append(paramsFilter, bson.E{"address", addressParam})
+		}
+		filter = append(filter, bson.E{"$or", paramsFilter})
 	}
 
 	cur, err := foodTrucksCollection.Find(r.Context(), filter)
