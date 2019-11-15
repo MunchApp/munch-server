@@ -3,9 +3,9 @@ package routes
 import (
 	"encoding/json"
 	"log"
+	"munchserver/dbutils"
 	"munchserver/middleware"
 	"munchserver/models"
-	"munchserver/queries"
 	"munchserver/secrets"
 	"net/http"
 	"time"
@@ -116,7 +116,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Find user in database
 	var user models.JSONUser
-	err = Db.Collection("users").FindOne(r.Context(), queries.UserWithEmail(*login.Email)).Decode(&user)
+	err = Db.Collection("users").FindOne(r.Context(), dbutils.WithEmailQuery(*login.Email)).Decode(&user)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusUnauthorized)
@@ -188,7 +188,7 @@ func PutFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 
 	updateFavesFilter := bson.M{updateOperator: bson.M{"favorites": foodTruckID}}
 
-	_, err := Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), updateFavesFilter)
+	_, err := Db.Collection("users").UpdateOne(r.Context(), dbutils.WithIDQuery(userID), updateFavesFilter)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -212,7 +212,7 @@ func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get user from database
 	var user models.JSONUser
-	err := Db.Collection("users").FindOne(r.Context(), queries.WithID(userID), queries.OptionsWithProjection(queries.ProfileProjection())).Decode(&user)
+	err := Db.Collection("users").FindOne(r.Context(), dbutils.WithIDQuery(userID), dbutils.OptionsWithProjection(dbutils.ProfileProjection())).Decode(&user)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -235,7 +235,7 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get user from database
 	var user models.JSONUser
-	err := Db.Collection("users").FindOne(r.Context(), queries.WithID(userID), queries.OptionsWithProjection(queries.UserProjection())).Decode(&user)
+	err := Db.Collection("users").FindOne(r.Context(), dbutils.WithIDQuery(userID), dbutils.OptionsWithProjection(dbutils.UserProjection())).Decode(&user)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusNotFound)

@@ -3,9 +3,9 @@ package routes
 import (
 	"encoding/json"
 	"log"
+	"munchserver/dbutils"
 	"munchserver/middleware"
 	"munchserver/models"
-	"munchserver/queries"
 	"net/http"
 	"regexp"
 
@@ -129,7 +129,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Update user that owns food truck
 	if user != "" {
-		_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(user), queries.PushOwnedFoodTruck(uuid.String()))
+		_, err = Db.Collection("users").UpdateOne(r.Context(), dbutils.WithIDQuery(user), dbutils.PushOwnedFoodTruck(uuid.String()))
 		if err != nil {
 			log.Printf("ERROR: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -153,7 +153,7 @@ func GetFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get food truck from database
 	var foodTruck models.JSONFoodTruck
-	err := Db.Collection("foodTrucks").FindOne(r.Context(), queries.WithID(foodTruckID)).Decode(&foodTruck)
+	err := Db.Collection("foodTrucks").FindOne(r.Context(), dbutils.WithIDQuery(foodTruckID)).Decode(&foodTruck)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -297,7 +297,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		{"$set", updateData},
 	}
 
-	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), queries.WithID(foodTruckID), update)
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), dbutils.WithIDQuery(foodTruckID), update)
 	if err != nil {
 		log.Fatal(err)
 	}
