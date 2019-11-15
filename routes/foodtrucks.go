@@ -110,7 +110,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		ID:          uuid.String(),
 		Name:        *newFoodTruck.Name,
 		Address:     *newFoodTruck.Address,
-		Location:    newFoodTruck.Location,
+		Location:    *newFoodTruck.Location,
 		Owner:       user,
 		Hours:       *newFoodTruck.Hours,
 		Reviews:     []string{},
