@@ -151,11 +151,6 @@ func TestPostFoodTruckValid(t *testing.T) {
 	updatedFoodTruck := tests.GetFoodTruck(addedFoodTruck.ID)
 	if updatedFoodTruck == nil || updatedFoodTruck.Name != "Luke's Coffee House" {
 		t.Error("Error finding the added food truck in the database.")
-		print(updatedFoodTruck.Name)
-
-		if updatedFoodTruck == nil {
-			t.Error("food truck is null")
-		}
 	}
 }
 
