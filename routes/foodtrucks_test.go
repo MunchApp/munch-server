@@ -12,6 +12,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// TODO: Add test for checking required fields when adding a food truck
+
 func TestFoodTrucksGetEmpty(t *testing.T) {
 	tests.ClearDB()
 	req, _ := http.NewRequest("GET", "/foodtrucks", nil)
