@@ -8,6 +8,7 @@ import (
 	"munchserver/models"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -166,27 +167,40 @@ func GetFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
+
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
 
 	// Create correct filter
-	filter := bson.D{}
+	var filter bson.M
 
-	nameParam := r.URL.Query().Get("name")
-	if nameParam != "" {
-		filter = append(filter, bson.E{"name", nameParam})
-	}
+	query := r.URL.Query().Get("query")
 
-	tagsParam := r.URL.Query()["tags"]
-	if len(tagsParam) != 0 {
-		var tagsFilter bson.D
-		tagsFilter = append(tagsFilter, bson.E{"$in", tagsParam})
-		filter = append(filter, bson.E{"tags", tagsFilter})
-	}
+	// Create correct filter if have tags or name
+	if query != "" {
 
-	addressParam := r.URL.Query().Get("address")
-	if addressParam != "" {
-		filter = append(filter, bson.E{"address", addressParam})
+		// Create name regex
+		queryParams := strings.Split(query, " ")
+
+		// Set regex as case insensitive
+		nameRegex := "(?i)"
+		for i, query := range queryParams {
+			nameRegex += "(" + query + ")"
+			if i < len(queryParams)-1 {
+				nameRegex += "|"
+			}
+
+		}
+
+		// Filter for tags and name
+		tagsParam := []interface{}{
+			bson.M{"tags": bson.M{"$regex": nameRegex}},
+			bson.M{"name": bson.M{"$regex": nameRegex}},
+		}
+		filter = bson.M{"$or": tagsParam}
+
+	} else {
+		filter = dbutils.AllQuery()
 	}
 
 	cur, err := foodTrucksCollection.Find(r.Context(), filter)
