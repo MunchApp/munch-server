@@ -100,6 +100,7 @@ func TestFoodTruckGetValid(t *testing.T) {
 		t.Errorf("expected food truck with id test, but got %v", foodTruck)
 	}
 }
+
 func TestFoodTrucksGetSearchValid(t *testing.T) {
 	tests.ClearDB()
 
@@ -124,6 +125,42 @@ func TestFoodTrucksGetSearchValid(t *testing.T) {
 
 	if foodTruck[0].Name != "testTruck" {
 		t.Errorf("expected food truck with name testTruck, but got %v", foodTruck[0].Name)
+	}
+}
+
+func TestFoodTrucksGetSearchMultipleValid(t *testing.T) {
+	tests.ClearDB()
+
+	addFoodTruck1 := models.JSONFoodTruck{
+		ID:   "test",
+		Name: "ice cold",
+	}
+	addFoodTruck2 := models.JSONFoodTruck{
+		ID:   "test",
+		Name: "ice cream",
+	}
+	tests.AddFoodTruck(addFoodTruck1)
+	tests.AddFoodTruck(addFoodTruck2)
+
+	req, _ := http.NewRequest("GET", "/foodtrucks?query=ice+cream", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("getting valid food truck with name expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	var foodTrucks []models.JSONFoodTruck
+	json.NewDecoder(rr.Body).Decode(&foodTrucks)
+
+	if len(foodTrucks) != 1 {
+		t.Errorf("expected one result from search of ice cream, but got %v", len(foodTrucks))
+	}
+
+	if foodTrucks[0].ID != "test" {
+		t.Errorf("expected food truck with name ice cream, but got %v", foodTrucks[0].Name)
 	}
 }
 
