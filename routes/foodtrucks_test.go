@@ -170,6 +170,11 @@ func TestFoodTrucksGetSearchMultipleValid(t *testing.T) {
 func TestFoodTrucksPostValid(t *testing.T) {
 	tests.ClearDB()
 
+	tests.AddUser(models.JSONUser{
+		ID:              "testuser",
+		OwnedFoodTrucks: []string{},
+	})
+
 	name := "Luke's Coffee House"
 	address := "2502 Nueces St\nAustin, TX 78705"
 	location := [2]float64{-97.74731, 30.28793}
