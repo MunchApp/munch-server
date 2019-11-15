@@ -198,8 +198,6 @@ func GetReviewHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	reviewID, reviewIDExists := params["reviewID"]
 
-	log.Printf("%v", params)
-
 	if !reviewIDExists {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -218,5 +216,4 @@ func GetReviewHandler(w http.ResponseWriter, r *http.Request) {
 	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(review)
-	w.WriteHeader(http.StatusOK)
 }
