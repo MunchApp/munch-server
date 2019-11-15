@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"munchserver/dbutils"
 	"munchserver/middleware"
@@ -182,9 +181,10 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Create name regex
 		queryParams := strings.Split(query, " ")
+
+		// Set regex as case insensitive
 		nameRegex := "(?i)"
 		for i, query := range queryParams {
-			fmt.Println(query)
 			nameRegex += "(" + query + ")"
 			if i < len(queryParams)-1 {
 				nameRegex += "|"
