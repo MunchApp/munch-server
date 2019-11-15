@@ -73,10 +73,12 @@ func TestFoodTruckGetInvalid(t *testing.T) {
 
 func TestFoodTruckGetValid(t *testing.T) {
 	tests.ClearDB()
+
 	addFoodTruck := models.JSONFoodTruck{
 		ID: "test",
 	}
 	tests.AddFoodTruck(addFoodTruck)
+
 	req, _ := http.NewRequest("GET", "/foodtruck", nil)
 	vars := map[string]string{
 		"foodTruckID": "test",
@@ -90,19 +92,23 @@ func TestFoodTruckGetValid(t *testing.T) {
 	if rr.Code != expected {
 		t.Errorf("getting single valid food truck expected status code of %v, but got %v", expected, rr.Code)
 	}
+
 	var foodTruck models.JSONFoodTruck
 	json.NewDecoder(rr.Body).Decode(&foodTruck)
+
 	if foodTruck.ID != "test" {
 		t.Errorf("expected food truck with id test, but got %v", foodTruck)
 	}
 }
 func TestFoodTrucksGetSearchValid(t *testing.T) {
 	tests.ClearDB()
+
 	addFoodTruck := models.JSONFoodTruck{
 		ID:   "test",
 		Name: "testTruck",
 	}
 	tests.AddFoodTruck(addFoodTruck)
+
 	req, _ := http.NewRequest("GET", "/foodtrucks?query=testTruck", nil)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(GetFoodTrucksHandler)
@@ -112,8 +118,10 @@ func TestFoodTrucksGetSearchValid(t *testing.T) {
 	if rr.Code != expected {
 		t.Errorf("getting valid food truck with name expected status code of %v, but got %v", expected, rr.Code)
 	}
+
 	var foodTruck []models.JSONFoodTruck
 	json.NewDecoder(rr.Body).Decode(&foodTruck)
+
 	if foodTruck[0].Name != "testTruck" {
 		t.Errorf("expected food truck with name testTruck, but got %v", foodTruck[0].Name)
 	}
