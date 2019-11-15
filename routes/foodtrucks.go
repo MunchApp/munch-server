@@ -174,18 +174,23 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
 
-	// Get location from query params
-	longitude, err := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	latitude, err := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+	// Parse location from query params
+	var location []float64
+	if r.URL.Query().Get("lon") != "" || r.URL.Query().Get("lat") != "" {
+		// Get location from query params
+		longitude, err := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		latitude, err := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		location = []float64{longitude, latitude}
 	}
 
 	// Create correct filter
@@ -220,22 +225,33 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		filter = dbutils.AllQuery()
 	}
 
-	geoStage := bson.D{
-		{"$geoNear", bson.M{
-			"near": bson.M{
-				"type":        "Point",
-				"coordinates": []float64{longitude, latitude},
-			},
-			"distanceField": "distance",
-			"spherical":     true,
-			"query":         filter,
-		}},
-	}
-	cur, err := foodTrucksCollection.Aggregate(r.Context(), mongo.Pipeline{geoStage})
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	var cur *mongo.Cursor
+	var err error
+	if location != nil {
+		geoStage := bson.D{
+			{"$geoNear", bson.M{
+				"near": bson.M{
+					"type":        "Point",
+					"coordinates": location,
+				},
+				"distanceField": "distance",
+				"spherical":     true,
+				"query":         filter,
+			}},
+		}
+		cur, err = foodTrucksCollection.Aggregate(r.Context(), mongo.Pipeline{geoStage})
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		cur, err = foodTrucksCollection.Find(r.Context(), filter)
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Get users from cursor, convert to empty slice if no users in DB

@@ -35,6 +35,13 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	locationIndex := mongo.IndexModel{
+		Keys: bson.M{"location": "2dsphere"},
+	}
+	_, err = Db.Collection("foodTrucks").Indexes().CreateOne(context.TODO(), locationIndex)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	code := m.Run()
 
