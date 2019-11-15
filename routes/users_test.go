@@ -327,3 +327,22 @@ func TestUserGetValidID(t *testing.T) {
 		t.Errorf("getting reviews of invalid food truck expected status code of %v, but got %v", expected, rr.Code)
 	}
 }
+
+func TestValidUpdateUserRequest(t *testing.T) {
+	tests.ClearDB()
+	user := models.JSONUser{
+		ID:          "10",
+		NameFirst:   "sample",
+		NameLast:    "user",
+		PhoneNumber: "123456",
+		City:        "Austin",
+		State:       "Texas",
+	}
+	tests.AddUser(user)
+
+	req, _ := http.NewRequest("PUT", "/user", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PutUpdateUserHandler)
+	handler.ServeHTTP(rr, req)
+
+}
