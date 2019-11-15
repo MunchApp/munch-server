@@ -168,6 +168,7 @@ func GetFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
+
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
 

@@ -59,19 +59,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	collation := options.Collation{
-		Locale:   "en",
-		Strength: 1,
-	}
-	foodTrucksIndex := mongo.IndexModel{
-		Keys:    bson.M{"name": 1, "tags": 1},
-		Options: options.Index().SetCollation(&collation),
-	}
-	_, err = db.Collection("foodTrucks").Indexes().CreateOne(context.TODO(), foodTrucksIndex)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	fmt.Println("Connected to MongoDB!")
 	log.Fatal(http.ListenAndServe(":"+secrets.GetPort(), router))
 }
