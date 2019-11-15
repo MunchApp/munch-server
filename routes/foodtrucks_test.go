@@ -122,18 +122,6 @@ func TestPostFoodTruckValid(t *testing.T) {
 	description := "testDescription"
 	tags := []string{"food", "good food"}
 
-	// type addFoodTruckRequest struct {
-	// 	Name        *string       `json:"name"`
-	// 	Address     *string       `json:"address"`
-	// 	Location    [2]float64    `json:"location"`
-	// 	Hours       *[7][2]string `json:"hours"`
-	// 	Photos      *[]string     `json:"photos"`
-	// 	Website     string        `json:"website"`
-	// 	PhoneNumber string        `json:"phoneNumber"`
-	// 	Description string        `json:"description"`
-	// 	Tags        []string      `json:"tags"`
-	// }
-
 	newFoodTruckTest := addFoodTruckRequest{
 		Name:        &name,
 		Address:     &address,
@@ -196,18 +184,6 @@ func TestPostFoodTruckInvalidHours(t *testing.T) {
 	description := "testDescription"
 	tags := []string{"food", "good food"}
 
-	// type addFoodTruckRequest struct {
-	// 	Name        *string       `json:"name"`
-	// 	Address     *string       `json:"address"`
-	// 	Location    [2]float64    `json:"location"`
-	// 	Hours       *[7][2]string `json:"hours"`
-	// 	Photos      *[]string     `json:"photos"`
-	// 	Website     string        `json:"website"`
-	// 	PhoneNumber string        `json:"phoneNumber"`
-	// 	Description string        `json:"description"`
-	// 	Tags        []string      `json:"tags"`
-	// }
-
 	newFoodTruckTest := addFoodTruckRequest{
 		Name:        &name,
 		Address:     &address,
@@ -252,18 +228,6 @@ func TestPostFoodTruckNoPhotos(t *testing.T) {
 	phone := "+18006729102"
 	description := "testDescription"
 	tags := []string{"food", "good food"}
-
-	// type addFoodTruckRequest struct {
-	// 	Name        *string       `json:"name"`
-	// 	Address     *string       `json:"address"`
-	// 	Location    [2]float64    `json:"location"`
-	// 	Hours       *[7][2]string `json:"hours"`
-	// 	Photos      *[]string     `json:"photos"`
-	// 	Website     string        `json:"website"`
-	// 	PhoneNumber string        `json:"phoneNumber"`
-	// 	Description string        `json:"description"`
-	// 	Tags        []string      `json:"tags"`
-	// }
 
 	newFoodTruckTest := addFoodTruckRequest{
 		Name:        &name,
