@@ -2,12 +2,14 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"munchserver/dbutils"
 	"munchserver/middleware"
 	"munchserver/models"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -170,33 +172,39 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	foodTrucksCollection := Db.Collection("foodTrucks")
 
 	// Create correct filter
-	var filter bson.D
+	var filter bson.M
 
-	nameParam := r.URL.Query().Get("name")
-	tagsParam := r.URL.Query()["tags"]
-	addressParam := r.URL.Query().Get("address")
+	query := r.URL.Query().Get("query")
 
-	if nameParam != "" && len(tagsParam) != 0 && addressParam != "" {
-		filter = bson.D{}
+	// Create correct filter if have tags or name
+	if query != "" {
+
+		// Create name regex
+		queryParams := strings.Split(query, " ")
+		nameRegex := "(?i)"
+		for i, query := range queryParams {
+			fmt.Println(query)
+			nameRegex += "(" + query + ")"
+			if i < len(queryParams)-1 {
+				nameRegex += "|"
+			}
+
+		}
+
+		// Filter for tags and name
+		tagsParam := []interface{}{
+			bson.M{"tags": bson.M{"$regex": nameRegex}},
+			bson.M{"name": bson.M{"$regex": nameRegex}},
+		}
+		filter = bson.M{"$or": tagsParam}
+
 	} else {
-		var paramsFilter bson.D
-		if nameParam != "" {
-			paramsFilter = append(paramsFilter, bson.E{"name", nameParam})
-		}
-		if len(tagsParam) != 0 {
-			var tagsFilter bson.D
-			tagsFilter = append(tagsFilter, bson.E{"$in", tagsParam})
-			paramsFilter = append(paramsFilter, bson.E{"tags", tagsFilter})
-		}
-		if addressParam != "" {
-			paramsFilter = append(paramsFilter, bson.E{"address", addressParam})
-		}
-		filter = append(filter, bson.E{"$or", paramsFilter})
+		filter = queries.All()
 	}
 
 	cur, err := foodTrucksCollection.Find(r.Context(), filter)
 	if err != nil {
-		log.Printf("ERROR: %v", err)
+		log.Printf("ERROR 1: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
