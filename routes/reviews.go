@@ -191,3 +191,29 @@ func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(reviews)
 }
+
+func GetReviewHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Get review ID from params
+	params := mux.Vars(r)
+	reviewID, reviewIDExists := params["reviewID"]
+
+	if !reviewIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get review from database
+	var review models.JSONReview
+	reviewsCollection := Db.Collection("reviews")
+	err := reviewsCollection.FindOne(r.Context(), dbutils.WithIDQuery(reviewID)).Decode(&review)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("ERROR: %v", err)
+		return
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(review)
+}
