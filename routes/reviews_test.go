@@ -376,3 +376,32 @@ func TestReviewsPostNewRating(t *testing.T) {
 		t.Errorf("adding valid review did not update rating of food truck, expected %v but got %v", 4.5, updatedFoodTruck.AvgRating)
 	}
 }
+
+func TestGetReviewWithID(t *testing.T) {
+	tests.ClearDB()
+
+	// Add sample review to DB
+	tests.AddReview(models.JSONReview{
+		ID: "test",
+	})
+	req, _ := http.NewRequest("GET", "/review", nil)
+	vars := map[string]string{
+		"reviewID": "test",
+	}
+	req = mux.SetURLVars(req, vars)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetReviewHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("getting single review expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	var review models.JSONReview
+	json.NewDecoder(rr.Body).Decode(&review)
+	if review.ID != "test" {
+		t.Errorf("expected review with id test, but got %v", review.ID)
+	}
+
+}
