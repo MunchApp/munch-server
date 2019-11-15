@@ -9,6 +9,7 @@ import (
 
 func TestContributorsGet(t *testing.T) {
 	tests.ClearDB()
+
 	req, _ := http.NewRequest("GET", "/contributors", nil)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(GetContributorsHandler)
