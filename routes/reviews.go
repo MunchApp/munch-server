@@ -53,6 +53,12 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Lookup food truck
+	var foodTruck models.JSONFoodTruck
+	err = Db.Collection("foodTrucks").FindOne(r.Context(), queries.WithID(*newReview.FoodTruck)).Decode(&foodTruck)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	// Generate uuid for food truck
 	uuid, err := uuid.NewRandom()
@@ -144,7 +150,7 @@ func GetReviewsOfFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 	cur, err := reviewsCollection.Find(r.Context(), queries.WithIDs(foodTruck.Reviews))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Error in database: %v", err)
+		log.Printf("ERROR: %v", err)
 		return
 	}
 
@@ -166,7 +172,7 @@ func GetReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	cur, err := reviewsCollection.Find(r.Context(), bson.D{})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Error in database: %v", err)
+		log.Printf("ERROR: %v", err)
 		return
 	}
 
