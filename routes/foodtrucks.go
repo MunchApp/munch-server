@@ -321,7 +321,7 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func PutClaimFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
+func PutClaimFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Checks for food truck ID
 	params := mux.Vars(r)

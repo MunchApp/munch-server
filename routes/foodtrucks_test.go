@@ -413,7 +413,7 @@ func TestClaimFoodTruckPutInvalidFoodTruck(t *testing.T) {
 	}
 	req = mux.SetURLVars(req, vars)
 	rr := httptest.NewRecorder()
-	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTrucksHandler))
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTruckHandler))
 	handler.ServeHTTP(rr, req)
 
 	expected := http.StatusNotFound
@@ -439,7 +439,7 @@ func TestClaimFoodTruckPutValid(t *testing.T) {
 	}
 	req = mux.SetURLVars(req, vars)
 	rr := httptest.NewRecorder()
-	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTrucksHandler))
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTruckHandler))
 	handler.ServeHTTP(rr, req)
 
 	expected := http.StatusOK
