@@ -199,7 +199,7 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		filter = bson.M{"$or": tagsParam}
 
 	} else {
-		filter = queries.All()
+		filter = dbutils.AllQuery()
 	}
 
 	cur, err := foodTrucksCollection.Find(r.Context(), filter)
