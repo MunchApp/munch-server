@@ -115,7 +115,7 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Attach review to food truck
-	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), dbutils.WithIDQuery(*newReview.FoodTruck), dbutils.UpdateFoodTruck(newAvgRating, uuid.String()))
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), dbutils.WithIDQuery(*newReview.FoodTruck), dbutils.UpdateFoodTruckWithReview(newAvgRating, uuid.String()))
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

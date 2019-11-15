@@ -32,6 +32,7 @@ func main() {
 	router.Use(middleware.AuthenticateUser)
 	router.HandleFunc("/profile", routes.GetProfileHandler).Methods("GET")
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
+	router.HandleFunc("/foodtrucks/claim/{foodTruckID}", routes.PutClaimFoodTruckHandler).Methods("PUT")
 	router.HandleFunc("/reviews", routes.PostReviewsHandler).Methods("POST")
 	router.HandleFunc("/users/favorite/{foodTruckID}", routes.PutFavoriteHandler).Methods("PUT")
 	router.HandleFunc("/profile", routes.PutUpdateProfileHandler).Methods("PUT")
