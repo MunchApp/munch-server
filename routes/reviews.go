@@ -59,6 +59,8 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	// Calculate rating sum to determine new avg rating, the new avg rating will be (that sum + review's rating) / new number of reviews
 	ratingSum := float32(len(foodTruck.Reviews)) * foodTruck.AvgRating
 	newAvgRating := (ratingSum + *newReview.Rating) / float32(len(foodTruck.Reviews)+1)
 
