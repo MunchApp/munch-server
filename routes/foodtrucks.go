@@ -204,7 +204,7 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	cur, err := foodTrucksCollection.Find(r.Context(), filter)
 	if err != nil {
-		log.Printf("ERROR 1: %v", err)
+		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
