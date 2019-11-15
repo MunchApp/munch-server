@@ -13,8 +13,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// TODO: Add test for checking required fields when adding a food truck
-
 func TestFoodTrucksGetEmpty(t *testing.T) {
 	tests.ClearDB()
 
@@ -169,7 +167,7 @@ func TestFoodTrucksGetSearchMultipleValid(t *testing.T) {
 	}
 }
 
-func TestPostFoodTruckValid(t *testing.T) {
+func TestFoodTrucksPostValid(t *testing.T) {
 	tests.ClearDB()
 
 	name := "Luke's Coffee House"
@@ -226,7 +224,7 @@ func TestPostFoodTruckValid(t *testing.T) {
 	}
 }
 
-func TestPostFoodTruckInvalidHours(t *testing.T) {
+func TestFoodTrucksPostInvalidHours(t *testing.T) {
 	tests.ClearDB()
 
 	name := "Luke's Coffee House"
@@ -276,7 +274,7 @@ func TestPostFoodTruckInvalidHours(t *testing.T) {
 
 }
 
-func TestFoodTruckPostUnauthorized(t *testing.T) {
+func TestFoodTrucksPostUnauthorized(t *testing.T) {
 	tests.ClearDB()
 
 	foodTruckRequest := addFoodTruckRequest{}
@@ -293,7 +291,7 @@ func TestFoodTruckPostUnauthorized(t *testing.T) {
 	}
 }
 
-func TestFoodTruckPostInvalid(t *testing.T) {
+func TestFoodTrucksPostInvalid(t *testing.T) {
 	tests.ClearDB()
 
 	foodTruckRequest := addFoodTruckRequest{}
@@ -310,7 +308,7 @@ func TestFoodTruckPostInvalid(t *testing.T) {
 	}
 }
 
-func TestPostFoodTruckNoPhotos(t *testing.T) {
+func TestFoodTrucksPostNoPhotos(t *testing.T) {
 	tests.ClearDB()
 
 	name := "Luke's Coffee House"
@@ -353,7 +351,7 @@ func TestPostFoodTruckNoPhotos(t *testing.T) {
 	}
 }
 
-func TestFoodTruckPostValid(t *testing.T) {
+func TestFoodTrucksPostValidMinimum(t *testing.T) {
 	tests.ClearDB()
 
 	name := "test cafe"
