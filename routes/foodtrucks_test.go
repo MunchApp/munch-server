@@ -113,8 +113,8 @@ func TestFoodTrucksGetDistance(t *testing.T) {
 	if foodTrucks[0].ID != "test" {
 		t.Errorf("expected food truck to have id test, but got %v", foodTrucks[0].ID)
 	}
-	if foodTrucks[0].Distance != 462.4518988877973 {
-		t.Errorf("expected food truck to have distance of %f, but got %v", 462.4518988877973, foodTrucks[0].Distance)
+	if foodTrucks[0].Distance-462 > 1 {
+		t.Errorf("expected food truck to have distance of around %v, but got %v", 462, foodTrucks[0].Distance)
 	}
 }
 
