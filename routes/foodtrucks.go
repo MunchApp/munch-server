@@ -25,7 +25,7 @@ type addFoodTruckRequest struct {
 	Address     *string       `json:"address"`
 	Location    *[2]float64   `json:"location"`
 	Hours       *[7][2]string `json:"hours"`
-	Photos      *[]string     `json:"photos"`
+	Photos      []string      `json:"photos"`
 	Website     string        `json:"website"`
 	PhoneNumber string        `json:"phoneNumber"`
 	Description string        `json:"description"`
@@ -89,8 +89,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	if newFoodTruck.Name == nil ||
 		newFoodTruck.Address == nil ||
 		newFoodTruck.Location == nil ||
-		newFoodTruck.Hours == nil ||
-		newFoodTruck.Photos == nil {
+		newFoodTruck.Hours == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -113,6 +112,10 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	if tags == nil {
 		tags = []string{}
 	}
+	photos := newFoodTruck.Photos
+	if photos == nil {
+		photos = []string{}
+	}
 
 	addedFoodTruck := models.JSONFoodTruck{
 		ID:          uuid.String(),
@@ -122,7 +125,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		Owner:       user,
 		Hours:       *newFoodTruck.Hours,
 		Reviews:     []string{},
-		Photos:      *newFoodTruck.Photos,
+		Photos:      photos,
 		Website:     newFoodTruck.Website,
 		PhoneNumber: newFoodTruck.PhoneNumber,
 		Description: newFoodTruck.Description,
