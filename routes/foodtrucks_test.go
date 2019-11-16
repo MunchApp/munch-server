@@ -105,7 +105,7 @@ func TestFoodTrucksGetDistance(t *testing.T) {
 		t.Errorf("getting all food trucks expected status code of %v, but got %v", expected, rr.Code)
 	}
 
-	var foodTrucks []models.JSONFoodTruck
+	var foodTrucks []foodTruckWithDistance
 	json.NewDecoder(rr.Body).Decode(&foodTrucks)
 	if len(foodTrucks) != 1 {
 		t.Errorf("expected array with one element, but got %v", foodTrucks)
