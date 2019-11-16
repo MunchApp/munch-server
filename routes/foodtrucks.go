@@ -360,7 +360,9 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), dbutils.WithIDQuery(foodTruckID), update)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	// Send response

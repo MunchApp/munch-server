@@ -655,6 +655,73 @@ func TestPutFoodTrucksHandler(t *testing.T) {
 	phone := "8006729102"
 	description := "testDescription"
 	tags := []string{"food", "good food"}
+	statusforTest := true
+
+	newFoodTruckTest := updateFoodTruckRequest{
+		Name:        &name,
+		Address:     &address,
+		Location:    &location,
+		Hours:       &hours,
+		Photos:      photos,
+		Website:     &website,
+		PhoneNumber: &phone,
+		Description: &description,
+		Tags:        tags,
+		Status:      &statusforTest,
+	}
+
+	tests.AddUser(models.JSONUser{
+		ID:      "testuser",
+		Reviews: []string{},
+	})
+	tests.AddFoodTruck(models.JSONFoodTruck{
+		ID:        "testfoodtruck",
+		Name:      "Luke's Covfefe",
+		Reviews:   []string{"fakereview"},
+		AvgRating: 4.0,
+	})
+
+	body, _ := json.Marshal(newFoodTruckTest)
+	req, _ := http.NewRequest("PUT", "/foodtrucks", bytes.NewBuffer(body))
+	vars := map[string]string{
+		"foodTruckID": "testfoodtruck",
+	}
+	req = mux.SetURLVars(req, vars)
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutFoodTrucksHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("getting single review expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+}
+
+func TestPutFoodTrucksHandlerInvalidHours(t *testing.T) {
+	tests.ClearDB()
+
+	name := "Luke's Coffee House"
+	address := "2502 Nueces St\nAustin, TX 78705"
+	location := [2]float64{-97.74731, 30.28793}
+	hours := [7][2]string{
+		[2]string{"10:00", "11:00"},
+		[2]string{"10:00", "11:00"},
+		[2]string{"10:00", "11:00"},
+		[2]string{"10:00", "11:00"},
+		[2]string{"10:00", "11:00"},
+		[2]string{"10:00", "11:00"},
+		[2]string{"catch_me_if_you_can!", "hello_i_am_a_bug"},
+	}
+	photos := []string{
+		"https://s3-media3.fl.yelpcdn.com/bphoto/d-1vKOqcEcRutpQ--jPa9A/o.jpg",
+		"https://s3-media4.fl.yelpcdn.com/bphoto/vXk0bXpV007fSWQiOTlHgg/o.jpg",
+		"https://s3-media2.fl.yelpcdn.com/bphoto/tUJ5gLnfRFhp_v-LUGj8Ww/o.jpg",
+	}
+	website := "www.google.com"
+	phone := "8006729102"
+	description := "testDescription"
+	tags := []string{"food", "good food"}
 
 	newFoodTruckTest := addFoodTruckRequest{
 		Name:        &name,
@@ -668,14 +735,13 @@ func TestPutFoodTrucksHandler(t *testing.T) {
 		Tags:        tags,
 	}
 
-
 	tests.AddUser(models.JSONUser{
 		ID:      "testuser",
 		Reviews: []string{},
 	})
 	tests.AddFoodTruck(models.JSONFoodTruck{
 		ID:        "testfoodtruck",
-		Name: "Luke's Covfefe",
+		Name:      "Luke's Covfefe",
 		Reviews:   []string{"fakereview"},
 		AvgRating: 4.0,
 	})
@@ -683,10 +749,16 @@ func TestPutFoodTrucksHandler(t *testing.T) {
 	body, _ := json.Marshal(newFoodTruckTest)
 	req, _ := http.NewRequest("PUT", "/foodtrucks", bytes.NewBuffer(body))
 	vars := map[string]string{
-		"reviewID": "test",
+		"foodTruckID": "testfoodtruck",
 	}
+	req = mux.SetURLVars(req, vars)
 	rr := httptest.NewRecorder()
-	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostFoodTrucksHandler))
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutFoodTrucksHandler))
 	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("adding food truck with invalid hours expected status code of %v, but got %v", expected, rr.Code)
+	}
 
 }
