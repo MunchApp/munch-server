@@ -429,7 +429,7 @@ func TestReviewGet(t *testing.T) {
 
 }
 
-func TestReviewGetEmpty(t *testing.T) {
+func TestReviewGetNoID(t *testing.T) {
 	tests.ClearDB()
 
 	// Add sample review to DB

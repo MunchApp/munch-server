@@ -179,7 +179,7 @@ func TestFoodTrucksGetSortOrder(t *testing.T) {
 	}
 }
 
-func TestFoodTruckGetEmpty(t *testing.T) {
+func TestFoodTruckGetNoID(t *testing.T) {
 	tests.ClearDB()
 
 	req, _ := http.NewRequest("GET", "/foodtruck", nil)
