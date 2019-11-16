@@ -9,6 +9,10 @@ import (
 	"munchserver/secrets"
 	"net/http"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -52,6 +56,16 @@ func main() {
 	// Inject db to routes
 	routes.Db = db
 	routes.Router = router
+
+	// Create aws session
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-2"),
+		Credentials: credentials.NewStaticCredentials(
+			"AKIA27WIWNZQ4PA3MPZ6",                     // id
+			"Nb9BejuMs6YIm+132feRcJtRF5YztYPKSdoxmEVJ", // secret
+			""), // token can be left blank for now
+	})
+	routes.Uploader = s3manager.NewUploader(sess)
 
 	// Setup db indexes
 	userIndex := mongo.IndexModel{
