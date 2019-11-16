@@ -256,7 +256,7 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+func PutUpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get user from context
 	userID, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
@@ -306,7 +306,7 @@ func PutUpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		{"$set", updateData},
 	}
 
-	_, err = Db.Collection("users").UpdateOne(r.Context(), queries.WithID(userID), update)
+	_, err = Db.Collection("users").UpdateOne(r.Context(), dbutils.WithIDQuery(userID), update)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
