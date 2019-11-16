@@ -369,19 +369,19 @@ func TestValidUpdateUserRequest(t *testing.T) {
 	}
 
 	updatedUser := tests.GetUser("testuser")
-	if updatedUser.NameFirst != "newFirst" {
+	if updatedUser.NameFirst != nameFirst {
 		t.Errorf("expected updated user with nameFirst 'newFirst', but got %v", updatedUser.NameFirst)
 	}
-	if updatedUser.NameLast != "newLast" {
+	if updatedUser.NameLast != nameLast {
 		t.Errorf("expected updated user with nameLast 'newLast', but got %v", updatedUser.NameLast)
 	}
-	if updatedUser.PhoneNumber != "654321" {
+	if updatedUser.PhoneNumber != phoneNumber {
 		t.Errorf("expected updated user with phoneNumber '654321', but got %v", updatedUser.PhoneNumber)
 	}
-	if updatedUser.City != "Albany" {
+	if updatedUser.City != city {
 		t.Errorf("expected updated user with city 'Albany', but got %v", updatedUser.City)
 	}
-	if updatedUser.State != "New York" {
+	if updatedUser.State != state {
 		t.Errorf("expected updated user with state 'New York', but got %v", updatedUser.State)
 	}
 	if updatedUser.DateOfBirth != dateOfBirth {
