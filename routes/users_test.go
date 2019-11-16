@@ -366,68 +366,6 @@ func TestUserGetValidID(t *testing.T) {
 	}
 }
 
-func TestProfilePutValid(t *testing.T) {
-	tests.ClearDB()
-	dob, _ := time.Parse(time.RFC3339, "1969-04-20T05:00:00.000Z")
-	user := models.JSONUser{
-		ID:          "testuser",
-		NameFirst:   "sample",
-		NameLast:    "user",
-		PhoneNumber: "123456",
-		City:        "Austin",
-		State:       "Texas",
-		DateOfBirth: dob,
-	}
-	tests.AddUser(user)
-
-	nameFirst := "newFirst"
-	nameLast := "newLast"
-	phoneNumber := "654321"
-	city := "Albany"
-	state := "New York"
-	dateOfBirth, _ := time.Parse(time.RFC3339, "1967-09-07T05:00:00.000Z")
-	updateProfileRequest := updateUserRequest{
-		NameFirst:   &nameFirst,
-		NameLast:    &nameLast,
-		PhoneNumber: &phoneNumber,
-		City:        &city,
-		State:       &state,
-		DateOfBirth: &dateOfBirth,
-	}
-	body, _ := json.Marshal(updateProfileRequest)
-
-	req, _ := http.NewRequest("PUT", "/users", bytes.NewBuffer(body))
-	rr := httptest.NewRecorder()
-	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutUpdateProfileHandler))
-	handler.ServeHTTP(rr, req)
-
-	expected := http.StatusOK
-	if rr.Code != expected {
-		t.Errorf("adding review with invalid food truck expected status code of %v, but got %v", expected, rr.Code)
-	}
-
-	updatedUser := tests.GetUser("testuser")
-	if updatedUser.NameFirst != nameFirst {
-		t.Errorf("expected updated user with nameFirst 'newFirst', but got %v", updatedUser.NameFirst)
-	}
-	if updatedUser.NameLast != nameLast {
-		t.Errorf("expected updated user with nameLast 'newLast', but got %v", updatedUser.NameLast)
-	}
-	if updatedUser.PhoneNumber != phoneNumber {
-		t.Errorf("expected updated user with phoneNumber '654321', but got %v", updatedUser.PhoneNumber)
-	}
-	if updatedUser.City != city {
-		t.Errorf("expected updated user with city 'Albany', but got %v", updatedUser.City)
-	}
-	if updatedUser.State != state {
-		t.Errorf("expected updated user with state 'New York', but got %v", updatedUser.State)
-	}
-	if updatedUser.DateOfBirth != dateOfBirth {
-		t.Errorf("expected updated user with date of birth '09/07/1967', but got %v", updatedUser.DateOfBirth)
-	}
-
-}
-
 func TestProfilePutInvalidBody(t *testing.T) {
 	tests.ClearDB()
 
@@ -460,4 +398,62 @@ func TestProfilePutUnauthorized(t *testing.T) {
 	if rr.Code != expected {
 		t.Errorf("adding review while unauthorized expected status code of %v, but got %v", expected, rr.Code)
 	}
+}
+
+func TestAddFavorite(t *testing.T) {
+	tests.ClearDB()
+	user := models.JSONUser{
+		ID:        "testuser",
+		Favorites: []string{},
+	}
+	tests.AddUser(user)
+
+	req, _ := http.NewRequest("PUT", "/users/favorite/testfoodtruck?action=add", nil)
+	vars := map[string]string{
+		"foodTruckID": "testfoodtruck",
+	}
+	req = mux.SetURLVars(req, vars)
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutFavoriteHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	updatedUser := tests.GetUser("testuser")
+	if updatedUser.Favorites[0] != "testfoodtruck" {
+		t.Errorf("expected updated user with favorite 'testfoodtruck', but got %v", updatedUser.Favorites[0])
+	}
+
+}
+
+func TestDeleteFavorite(t *testing.T) {
+	tests.ClearDB()
+	user := models.JSONUser{
+		ID:        "testuser",
+		Favorites: []string{"testfoodtruck"},
+	}
+	tests.AddUser(user)
+
+	req, _ := http.NewRequest("PUT", "/users/favorite/testfoodtruck?action=delete", nil)
+	vars := map[string]string{
+		"foodTruckID": "testfoodtruck",
+	}
+	req = mux.SetURLVars(req, vars)
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutFavoriteHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	updatedUser := tests.GetUser("testuser")
+	if len(updatedUser.Favorites) != 0 {
+		t.Errorf("expected updated user with favorite 'testfoodtruck', but got %v", updatedUser.Favorites[0])
+	}
+
 }
