@@ -170,6 +170,11 @@ func TestFoodTrucksGetSearchMultipleValid(t *testing.T) {
 func TestFoodTrucksPostValid(t *testing.T) {
 	tests.ClearDB()
 
+	tests.AddUser(models.JSONUser{
+		ID:              "testuser",
+		OwnedFoodTrucks: []string{},
+	})
+
 	name := "Luke's Coffee House"
 	address := "2502 Nueces St\nAustin, TX 78705"
 	location := [2]float64{-97.74731, 30.28793}
@@ -377,12 +382,83 @@ func TestFoodTrucksPostValidMinimum(t *testing.T) {
 	if rr.Code != expected {
 		t.Errorf("adding valid food truck expected status code of %v, but got %v", expected, rr.Code)
 	}
-
 	var foodTruck models.JSONFoodTruck
 	json.NewDecoder(rr.Body).Decode(&foodTruck)
 
 	addedFoodTruck := tests.GetFoodTruck(foodTruck.ID)
 	if addedFoodTruck == nil || addedFoodTruck.Name != name || addedFoodTruck.Address != address {
 		t.Error("adding valid food truck expected food truck in db")
+	}
+}
+
+func TestClaimFoodTruckPutUnauthorized(t *testing.T) {
+	tests.ClearDB()
+
+	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	vars := map[string]string{
+		"foodTruckID": "test",
+	}
+	req = mux.SetURLVars(req, vars)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PutClaimFoodTruckHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusUnauthorized
+	if rr.Code != expected {
+		t.Errorf("claiming a food truck while unauthorized expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestClaimFoodTruckPutInvalidFoodTruck(t *testing.T) {
+	tests.ClearDB()
+
+	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	vars := map[string]string{
+		"foodTruckID": "test",
+	}
+	req = mux.SetURLVars(req, vars)
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTruckHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusNotFound
+	if rr.Code != expected {
+		t.Errorf("claiming an invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestClaimFoodTruckPutValid(t *testing.T) {
+	tests.ClearDB()
+
+	tests.AddUser(models.JSONUser{
+		ID:              "testuser",
+		OwnedFoodTrucks: []string{},
+	})
+	tests.AddFoodTruck(models.JSONFoodTruck{
+		ID: "testfoodtruck",
+	})
+
+	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	vars := map[string]string{
+		"foodTruckID": "testfoodtruck",
+	}
+	req = mux.SetURLVars(req, vars)
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTruckHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("claiming a valid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	foodTruck := tests.GetFoodTruck("testfoodtruck")
+	if foodTruck == nil || foodTruck.Owner != "testuser" {
+		t.Error("claiming a valid food truck should have updated owner of food truck")
+	}
+
+	user := tests.GetUser("testuser")
+	if user == nil || len(user.OwnedFoodTrucks) != 1 || user.OwnedFoodTrucks[0] != "testfoodtruck" {
+		t.Error("claiming a valid food truck should have added food truck to user")
 	}
 }

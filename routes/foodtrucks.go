@@ -319,5 +319,52 @@ func PutFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Send response
 	w.WriteHeader(http.StatusOK)
+}
 
+func PutClaimFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Checks for food truck ID
+	params := mux.Vars(r)
+	foodTruckID, foodTruckIDExists := params["foodTruckID"]
+	if !foodTruckIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get user from context
+	userID, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// Lookup food truck in db
+	var foodTruck models.JSONFoodTruck
+	err := Db.Collection("foodTrucks").FindOne(r.Context(), dbutils.WithIDQuery(foodTruckID)).Decode(&foodTruck)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Set food truck owner
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), dbutils.WithIDQuery(foodTruckID), dbutils.SetFoodTruckOwner(userID))
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Add food truck to user
+	_, err = Db.Collection("users").UpdateOne(r.Context(), dbutils.WithIDQuery(userID), dbutils.PushOwnedFoodTruck(foodTruckID))
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Send response
+	w.WriteHeader(http.StatusOK)
 }

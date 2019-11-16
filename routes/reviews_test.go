@@ -64,6 +64,8 @@ func TestReviewsGetNonEmpty(t *testing.T) {
 }
 
 func TestReviewsOfFoodTruckGetInvalidID(t *testing.T) {
+	tests.ClearDB()
+
 	req, _ := http.NewRequest("GET", "/reviews/foodtruck", nil)
 	vars := map[string]string{
 		"foodTruckID": "invalid-id",
@@ -80,6 +82,8 @@ func TestReviewsOfFoodTruckGetInvalidID(t *testing.T) {
 }
 
 func TestReviewsOfFoodTruckGetInvalid(t *testing.T) {
+	tests.ClearDB()
+
 	req, _ := http.NewRequest("GET", "/reviews/foodtruck", nil)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(GetReviewsOfFoodTruckHandler)
@@ -93,6 +97,7 @@ func TestReviewsOfFoodTruckGetInvalid(t *testing.T) {
 
 func TestReviewsOfFoodTruckGetValidWithReview(t *testing.T) {
 	tests.ClearDB()
+
 	testFoodTruck := models.JSONFoodTruck{
 		ID:      "test",
 		Reviews: []string{"test"},
@@ -132,6 +137,7 @@ func TestReviewsOfFoodTruckGetValidWithReview(t *testing.T) {
 
 func TestReviewsOfFoodTruckGetValidWithoutReview(t *testing.T) {
 	tests.ClearDB()
+
 	testFoodTruck := models.JSONFoodTruck{
 		ID:      "test",
 		Reviews: []string{},
