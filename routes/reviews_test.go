@@ -407,7 +407,7 @@ func TestReviewGet(t *testing.T) {
 	tests.AddReview(models.JSONReview{
 		ID: "test",
 	})
-	req, _ := http.NewRequest("GET", "/review", nil)
+	req, _ := http.NewRequest("GET", "/reviews", nil)
 	vars := map[string]string{
 		"reviewID": "test",
 	}
@@ -436,7 +436,7 @@ func TestReviewGetEmpty(t *testing.T) {
 	tests.AddReview(models.JSONReview{
 		ID: "test",
 	})
-	req, _ := http.NewRequest("GET", "/review", nil)
+	req, _ := http.NewRequest("GET", "/reviews", nil)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(GetReviewHandler)
 	handler.ServeHTTP(rr, req)

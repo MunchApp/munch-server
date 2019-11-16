@@ -548,7 +548,7 @@ func TestFoodTrucksPostValidMinimum(t *testing.T) {
 func TestClaimFoodTruckPutUnauthorized(t *testing.T) {
 	tests.ClearDB()
 
-	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
 	vars := map[string]string{
 		"foodTruckID": "test",
 	}
@@ -566,7 +566,7 @@ func TestClaimFoodTruckPutUnauthorized(t *testing.T) {
 func TestClaimFoodTruckPutNoFoodTruck(t *testing.T) {
 	tests.ClearDB()
 
-	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
 	rr := httptest.NewRecorder()
 	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTruckHandler))
 	handler.ServeHTTP(rr, req)
@@ -580,7 +580,7 @@ func TestClaimFoodTruckPutNoFoodTruck(t *testing.T) {
 func TestClaimFoodTruckPutInvalidFoodTruck(t *testing.T) {
 	tests.ClearDB()
 
-	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
 	vars := map[string]string{
 		"foodTruckID": "test",
 	}
@@ -606,7 +606,7 @@ func TestClaimFoodTruckPutValid(t *testing.T) {
 		ID: "testfoodtruck",
 	})
 
-	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
 	vars := map[string]string{
 		"foodTruckID": "testfoodtruck",
 	}
