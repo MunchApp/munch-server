@@ -36,6 +36,15 @@ type registerRequest struct {
 	DateOfBirth *time.Time `json:"dateOfBirth"`
 }
 
+type updateUserRequest struct {
+	NameFirst   *string    `json:"firstName"`
+	NameLast    *string    `json:"lastName"`
+	PhoneNumber *string    `json:"phoneNumber"`
+	City        *string    `json:"city"`
+	State       *string    `json:"state"`
+	DateOfBirth *time.Time `json:"dateOfBirth"`
+}
+
 // PostRegisterHandler handles the logic for registering a user
 func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Decode registered user's data
@@ -245,4 +254,66 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+func PutUpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Get user from context
+	userID, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	userDecoder := json.NewDecoder(r.Body)
+	userDecoder.DisallowUnknownFields()
+
+	// Decode request
+	var updatedUser updateUserRequest
+	err := userDecoder.Decode(&updatedUser)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Determine which fields should be updated
+	var updateData bson.D
+
+	if updatedUser.NameFirst != nil {
+		updateData = append(updateData, bson.E{"firstName", *updatedUser.NameFirst})
+	}
+	if updatedUser.NameLast != nil {
+		updateData = append(updateData, bson.E{"lastName", *updatedUser.NameLast})
+	}
+	if updatedUser.PhoneNumber != nil {
+		updateData = append(updateData, bson.E{"phoneNumber", *updatedUser.PhoneNumber})
+	}
+	if updatedUser.City != nil {
+		updateData = append(updateData, bson.E{"city", *updatedUser.City})
+	}
+	if updatedUser.State != nil {
+		updateData = append(updateData, bson.E{"state", *updatedUser.State})
+	}
+	if updatedUser.DateOfBirth != nil {
+		updateData = append(updateData, bson.E{"dateOfBirth", *updatedUser.DateOfBirth})
+	}
+
+	// Update food truck document
+	update := bson.D{
+		{"$set", updateData},
+	}
+
+	_, err = Db.Collection("users").UpdateOne(r.Context(), dbutils.WithIDQuery(userID), update)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Send response
+	w.WriteHeader(http.StatusOK)
+
 }
