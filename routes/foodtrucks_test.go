@@ -712,6 +712,21 @@ func TestPutFoodTrucksHandler(t *testing.T) {
 	if updatedFoodTruck.Hours != hours {
 		t.Error("Hours don't match.")
 	}
+	if updatedFoodTruck.PhoneNumber != phone {
+		t.Error("Phone number doesn't match.")
+	}
+	if updatedFoodTruck.Website != website {
+		t.Error("Website did not match.")
+	}
+	if updatedFoodTruck.Description != description {
+		t.Error("description didn't match...")
+	}
+	if len(updatedFoodTruck.Tags) == 0 {
+		t.Error("Lengths of tags did not match.")
+	}
+	if len(updatedFoodTruck.Photos) == 0 {
+		t.Error("Lengths of photos did not match.")
+	}
 
 }
 
