@@ -12,6 +12,10 @@ func SetFoodTruckOwner(userID string) bson.M {
 	return bson.M{"$set": bson.M{"owner": userID}}
 }
 
+func SetProfilePicture(pictureURL string) bson.M {
+	return bson.M{"$set": bson.M{"picture": pictureURL}}
+}
+
 func PushOwnedFoodTruck(foodTruckID string) bson.M {
 	return bson.M{"$push": bson.M{"ownedFoodTrucks": foodTruckID}}
 }

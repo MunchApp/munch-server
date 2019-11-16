@@ -8,8 +8,11 @@ import (
 	"munchserver/models"
 	"munchserver/secrets"
 	"net/http"
+	"path/filepath"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -43,6 +46,70 @@ type updateUserRequest struct {
 	City        *string    `json:"city"`
 	State       *string    `json:"state"`
 	DateOfBirth *time.Time `json:"dateOfBirth"`
+}
+
+func PutProfileUploadHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Get user from context
+	userID, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user, or if the user agent is from the scraper
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err := r.ParseMultipartForm(1024000 * 4)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
+		return
+	}
+
+	file, fileHeader, err := r.FormFile("image")
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if filepath.Ext(fileHeader.Filename) != ".jpg" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	defer file.Close()
+	size := fileHeader.Size
+	buffer := make([]byte, size)
+	file.Read(buffer)
+
+	// Generate a random uuidv4
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Create file name for image
+	filename := uuid.String() + filepath.Ext(fileHeader.Filename)
+
+	// Upload image to s3
+	result, err := Uploader.UploadWithContext(r.Context(), &s3manager.UploadInput{
+		Bucket: aws.String("munch-assets"),
+		Key:    aws.String(filename),
+		Body:   file,
+	})
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
+	_, err = Db.Collection("users").UpdateOne(r.Context(), dbutils.WithIDQuery(userID), dbutils.SetProfilePicture(result.Location))
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 // PostRegisterHandler handles the logic for registering a user
