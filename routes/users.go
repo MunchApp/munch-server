@@ -109,6 +109,7 @@ func PutProfileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	// Send response

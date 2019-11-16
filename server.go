@@ -66,6 +66,10 @@ func main() {
 			secrets.GetAWSSecretAccessKey(), // secret
 			""),                             // token can be left blank for now
 	})
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+	}
+
 	routes.Uploader = s3manager.NewUploader(sess)
 
 	// Setup db indexes
