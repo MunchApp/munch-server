@@ -19,3 +19,7 @@ func PushOwnedFoodTruck(foodTruckID string) bson.M {
 func PushReview(reviewID string) bson.M {
 	return bson.M{"$push": bson.M{"reviews": reviewID}}
 }
+
+func PushPhoto(photoURL string) bson.M {
+	return bson.M{"$push": bson.M{"photos": photoURL}}
+}

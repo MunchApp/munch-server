@@ -7,10 +7,13 @@ import (
 	"munchserver/middleware"
 	"munchserver/models"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -415,4 +418,76 @@ func PutClaimFoodTruckHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Send response
 	w.WriteHeader(http.StatusOK)
+}
+
+func PutFoodTruckUploadHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Checks for food truck ID
+	params := mux.Vars(r)
+	foodTruckID, foodTruckIDExists := params["foodTruckID"]
+	if !foodTruckIDExists {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get user from context
+	_, userLoggedIn := r.Context().Value(middleware.UserKey).(string)
+
+	// Check for a user, or if the user agent is from the scraper
+	if !userLoggedIn {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err := r.ParseMultipartForm(1024000 * 4)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
+		return
+	}
+
+	file, fileHeader, err := r.FormFile("image")
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if filepath.Ext(fileHeader.Filename) != ".jpg" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	defer file.Close()
+	size := fileHeader.Size
+	buffer := make([]byte, size)
+	file.Read(buffer)
+
+	// Generate a random uuidv4
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Create file name for image
+	filename := uuid.String() + filepath.Ext(fileHeader.Filename)
+
+	// Upload image to s3
+	result, err := Uploader.UploadWithContext(r.Context(), &s3manager.UploadInput{
+		Bucket: aws.String("munch-assets"),
+		Key:    aws.String(filename),
+		Body:   file,
+	})
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
+	_, err = Db.Collection("foodTrucks").UpdateOne(r.Context(), dbutils.WithIDQuery(foodTruckID), dbutils.PushPhoto(result.Location))
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
