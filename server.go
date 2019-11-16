@@ -61,9 +61,9 @@ func main() {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-west-2"),
 		Credentials: credentials.NewStaticCredentials(
-			"AKIA27WIWNZQ4PA3MPZ6",                     // id
-			"Nb9BejuMs6YIm+132feRcJtRF5YztYPKSdoxmEVJ", // secret
-			""), // token can be left blank for now
+			secrets.GetAWSAccessKey(),       // id
+			secrets.GetAWSSecretAccessKey(), // secret
+			""),                             // token can be left blank for now
 	})
 	routes.Uploader = s3manager.NewUploader(sess)
 

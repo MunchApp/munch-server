@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"log"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
@@ -42,4 +43,20 @@ func GetPort() string {
 		port = "80"
 	}
 	return port
+}
+
+func GetAWSAccessKey() string {
+	accessKey, exists := os.LookupEnv("AWS_ACCESS_KEY")
+	if !exists {
+		log.Println("AWS Access key not found, s3 upload will not work")
+	}
+	return accessKey
+}
+
+func GetAWSSecretAccessKey() string {
+	secretAccessKey, exists := os.LookupEnv("AWS_SECRET_ACCESS_KEY")
+	if !exists {
+		log.Println("AWS Secret access key not found, s3 upload will not work")
+	}
+	return secretAccessKey
 }
