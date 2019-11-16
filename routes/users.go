@@ -110,6 +110,9 @@ func PutProfileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("ERROR: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+
+	// Send response
+	w.WriteHeader(http.StatusOK)
 }
 
 // PostRegisterHandler handles the logic for registering a user
