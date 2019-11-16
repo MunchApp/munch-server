@@ -696,6 +696,23 @@ func TestPutFoodTrucksHandler(t *testing.T) {
 		t.Errorf("getting single review expected status code of %v, but got %v", expected, rr.Code)
 	}
 
+	updatedFoodTruck := tests.GetFoodTruck("testfoodtruck")
+	if updatedFoodTruck.Name != name {
+		t.Errorf("expected updated user with name 'newFirst', but got %v", updatedFoodTruck.Name)
+	}
+	if updatedFoodTruck.Address != address {
+		t.Errorf("expected updated user with address 'newLast', but got %v", updatedFoodTruck.Address)
+	}
+	if updatedFoodTruck.Location != location {
+		t.Error("Locations didnt match.")
+	}
+	if updatedFoodTruck.Status != statusforTest {
+		t.Error("Statuses didn't match.")
+	}
+	if updatedFoodTruck.Hours != hours {
+		t.Error("Hours don't match.")
+	}
+
 }
 
 func TestPutFoodTrucksHandlerInvalidHours(t *testing.T) {
