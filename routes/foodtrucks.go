@@ -8,11 +8,13 @@ import (
 	"munchserver/models"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type addFoodTruckRequest struct {
@@ -38,6 +40,24 @@ type updateFoodTruckRequest struct {
 	PhoneNumber *string       `json:"phoneNumber"`
 	Description *string       `json:"description"`
 	Tags        []string      `json:"tags"`
+}
+
+type foodTruckWithDistance struct {
+	ID          string       `json:"id" bson:"_id"`
+	Name        string       `json:"name" bson:"name"`
+	Address     string       `json:"address" bson:"address"`
+	Location    [2]float64   `json:"location" bson:"location"`
+	Owner       string       `json:"owner" bson:"owner"`
+	Status      bool         `json:"status" bson:"status"`
+	AvgRating   float32      `json:"avgRating" bson:"avgRating"`
+	Hours       [7][2]string `json:"hours" bson:"hours"`
+	Reviews     []string     `json:"reviews" bson:"reviews"`
+	Photos      []string     `json:"photos" bson:"photos"`
+	Website     string       `json:"website" bson:"website"`
+	PhoneNumber string       `json:"phoneNumber" bson:"phoneNumber"`
+	Description string       `json:"description" bson:"description"`
+	Tags        []string     `json:"tags" bson:"tags"`
+	Distance    float64      `json:"distance" bson:"distance"`
 }
 
 func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
@@ -172,6 +192,25 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all foodtrucks from the database into a cursor
 	foodTrucksCollection := Db.Collection("foodTrucks")
 
+	// Parse location from query params
+	var location []float64
+	if r.URL.Query().Get("lon") != "" || r.URL.Query().Get("lat") != "" {
+		// Get location from query params
+		longitude, err := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		latitude, err := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		location = []float64{longitude, latitude}
+	}
+
 	// Create correct filter
 	var filter bson.M
 
@@ -204,18 +243,40 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		filter = dbutils.AllQuery()
 	}
 
-	cur, err := foodTrucksCollection.Find(r.Context(), filter)
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	var cur *mongo.Cursor
+	var err error
+	if location != nil {
+		geoStage := bson.D{
+			{"$geoNear", bson.M{
+				"near": bson.M{
+					"type":        "Point",
+					"coordinates": location,
+				},
+				"distanceField": "distance",
+				"spherical":     true,
+				"query":         filter,
+			}},
+		}
+		cur, err = foodTrucksCollection.Aggregate(r.Context(), mongo.Pipeline{geoStage})
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		cur, err = foodTrucksCollection.Find(r.Context(), filter)
+		if err != nil {
+			log.Printf("ERROR: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Get users from cursor, convert to empty slice if no users in DB
-	var foodTrucks []models.JSONFoodTruck
+	var foodTrucks []foodTruckWithDistance
 	cur.All(r.Context(), &foodTrucks)
 	if foodTrucks == nil {
-		foodTrucks = make([]models.JSONFoodTruck, 0)
+		foodTrucks = make([]foodTruckWithDistance, 0)
 	}
 
 	// Send response

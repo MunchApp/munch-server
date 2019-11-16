@@ -54,8 +54,116 @@ func TestFoodTrucksGetSingle(t *testing.T) {
 	if len(foodTrucks) != 1 {
 		t.Errorf("expected array with one element, but got %v", foodTrucks)
 	}
+	if foodTrucks[0].ID != "test" {
+		t.Errorf("expected food truck to have id test, but got %v", foodTrucks[0].ID)
+	}
 }
 
+func TestFoodTrucksGetInvalidLat(t *testing.T) {
+	tests.ClearDB()
+
+	req, _ := http.NewRequest("GET", "/foodtrucks?lat=joe's house&lon=-97.735592", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("getting all food trucks expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestFoodTrucksGetInvalidLon(t *testing.T) {
+	tests.ClearDB()
+
+	req, _ := http.NewRequest("GET", "/foodtrucks?lat=30.288441&lon=joe's house", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("getting all food trucks expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestFoodTrucksGetDistance(t *testing.T) {
+	tests.ClearDB()
+	foodTruck := models.JSONFoodTruck{
+		ID:       "test",
+		Location: [2]float64{-97.739928, 30.290241},
+	}
+	tests.AddFoodTruck(foodTruck)
+
+	req, _ := http.NewRequest("GET", "/foodtrucks?lat=30.288441&lon=-97.735592", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("getting all food trucks expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	var foodTrucks []foodTruckWithDistance
+	json.NewDecoder(rr.Body).Decode(&foodTrucks)
+	if len(foodTrucks) != 1 {
+		t.Errorf("expected array with one element, but got %v", foodTrucks)
+	}
+	if foodTrucks[0].ID != "test" {
+		t.Errorf("expected food truck to have id test, but got %v", foodTrucks[0].ID)
+	}
+	if foodTrucks[0].Distance-462 > 1 {
+		t.Errorf("expected food truck to have distance of around %v, but got %v", 462, foodTrucks[0].Distance)
+	}
+}
+
+func TestFoodTrucksGetSortOrder(t *testing.T) {
+	tests.ClearDB()
+	foodTruck1 := models.JSONFoodTruck{
+		ID:       "test1",
+		Name:     "coop",
+		Location: [2]float64{-97.742496, 30.286302},
+	}
+	foodTruck2 := models.JSONFoodTruck{
+		ID:       "test2",
+		Name:     "26th",
+		Location: [2]float64{-97.744605, 30.290466},
+	}
+	foodTruck3 := models.JSONFoodTruck{
+		ID:       "test3",
+		Name:     "kins",
+		Location: [2]float64{-97.739928, 30.290241},
+	}
+	tests.AddFoodTruck(foodTruck1)
+	tests.AddFoodTruck(foodTruck2)
+	tests.AddFoodTruck(foodTruck3)
+
+	req, _ := http.NewRequest("GET", "/foodtrucks?lat=30.288441&lon=-97.735592", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("getting all food trucks expected status code of %v, but got %v", expected, rr.Code)
+	}
+
+	var foodTrucks []models.JSONFoodTruck
+	json.NewDecoder(rr.Body).Decode(&foodTrucks)
+	if len(foodTrucks) != 3 {
+		t.Errorf("expected array with three element, but got %v", foodTrucks)
+	}
+	if foodTrucks[0].ID != "test3" {
+		t.Errorf("expected first food truck to be kins, but got %v", foodTrucks[0].Name)
+	}
+	if foodTrucks[1].ID != "test1" {
+		t.Errorf("expected second food truck to be coop, but got %v", foodTrucks[1].Name)
+	}
+	if foodTrucks[2].ID != "test2" {
+		t.Errorf("expected third food truck to be 26th, but got %v", foodTrucks[2].Name)
+	}
+}
 func TestFoodTruckGetInvalid(t *testing.T) {
 	tests.ClearDB()
 

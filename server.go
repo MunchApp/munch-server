@@ -61,6 +61,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	locationIndex := mongo.IndexModel{
+		Keys: bson.M{"location": "2dsphere"},
+	}
+	_, err = db.Collection("foodTrucks").Indexes().CreateOne(context.TODO(), locationIndex)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println("Connected to MongoDB!")
 	log.Fatal(http.ListenAndServe(":"+secrets.GetPort(), router))
