@@ -339,7 +339,7 @@ func TestFoodTrucksPostValid(t *testing.T) {
 		Address:     &address,
 		Location:    &location,
 		Hours:       &hours,
-		Photos:      &photos,
+		Photos:      photos,
 		Website:     website,
 		PhoneNumber: phone,
 		Description: description,
@@ -396,7 +396,7 @@ func TestFoodTrucksPostInvalidHours(t *testing.T) {
 		Address:     &address,
 		Location:    &location,
 		Hours:       &hours,
-		Photos:      &photos,
+		Photos:      photos,
 		Website:     website,
 		PhoneNumber: phone,
 		Description: description,
@@ -467,49 +467,6 @@ func TestFoodTrucksPostInvalid(t *testing.T) {
 	}
 }
 
-func TestFoodTrucksPostNoPhotos(t *testing.T) {
-	tests.ClearDB()
-
-	name := "Luke's Coffee House"
-	address := "2502 Nueces St\nAustin, TX 78705"
-	location := [2]float64{-97.74731, 30.28793}
-	hours := [7][2]string{
-		[2]string{"10:00", "11:00"},
-		[2]string{"10:00", "11:00"},
-		[2]string{"10:00", "11:00"},
-		[2]string{"10:00", "11:00"},
-		[2]string{"10:00", "11:00"},
-		[2]string{"10:00", "11:00"},
-		[2]string{"10:00", "11:00"},
-	}
-	website := "www.google.com"
-	phone := "8006729102"
-	description := "testDescription"
-	tags := []string{"food", "good food"}
-
-	newFoodTruckTest := addFoodTruckRequest{
-		Name:        &name,
-		Address:     &address,
-		Location:    &location,
-		Hours:       &hours,
-		Website:     website,
-		PhoneNumber: phone,
-		Description: description,
-		Tags:        tags,
-	}
-
-	body, _ := json.Marshal(newFoodTruckTest)
-	req, _ := http.NewRequest("POST", "/foodtrucks", bytes.NewBuffer(body))
-	rr := httptest.NewRecorder()
-	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostFoodTrucksHandler))
-	handler.ServeHTTP(rr, req)
-
-	expected := http.StatusBadRequest
-	if rr.Code != expected {
-		t.Errorf("adding food truck with no photos expected status code of %v, but got %v", expected, rr.Code)
-	}
-}
-
 func TestFoodTrucksPostValidMinimum(t *testing.T) {
 	tests.ClearDB()
 
@@ -523,7 +480,7 @@ func TestFoodTrucksPostValidMinimum(t *testing.T) {
 		Address:  &address,
 		Location: &location,
 		Hours:    &hours,
-		Photos:   &photos,
+		Photos:   photos,
 	}
 	body, _ := json.Marshal(foodTruckRequest)
 
@@ -760,7 +717,7 @@ func TestPutFoodTrucksHandlerInvalidHours(t *testing.T) {
 		Address:     &address,
 		Location:    &location,
 		Hours:       &hours,
-		Photos:      &photos,
+		Photos:      photos,
 		Website:     website,
 		PhoneNumber: phone,
 		Description: description,
