@@ -434,7 +434,7 @@ func TestProfilePutInvalidBody(t *testing.T) {
 	updateProfileRequest := invalidRequestBody{}
 	body, _ := json.Marshal(updateProfileRequest)
 
-	req, _ := http.NewRequest("PUT", "/users", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/profile", bytes.NewBuffer(body))
 	rr := httptest.NewRecorder()
 	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutUpdateProfileHandler))
 	handler.ServeHTTP(rr, req)
@@ -451,7 +451,7 @@ func TestProfilePutUnauthorized(t *testing.T) {
 	updateProfileRequest := invalidRequestBody{}
 	body, _ := json.Marshal(updateProfileRequest)
 
-	req, _ := http.NewRequest("PUT", "/users", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("PUT", "/profile", bytes.NewBuffer(body))
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(PutUpdateProfileHandler)
 	handler.ServeHTTP(rr, req)
