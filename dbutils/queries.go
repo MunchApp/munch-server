@@ -14,10 +14,6 @@ func WithIDsQuery(ids []string) bson.M {
 	return bson.M{"_id": bson.M{"$in": ids}}
 }
 
-func WithFoodTruckQuery(id string) bson.M {
-	return bson.M{"foodTruck": id}
-}
-
 func WithEmailQuery(email string) bson.M {
 	return bson.M{"email": email}
 }
