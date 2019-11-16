@@ -15,6 +15,7 @@ import (
 
 func TestFoodTrucksGetEmpty(t *testing.T) {
 	tests.ClearDB()
+
 	req, _ := http.NewRequest("GET", "/foodtrucks", nil)
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(GetFoodTrucksHandler)
@@ -32,6 +33,7 @@ func TestFoodTrucksGetEmpty(t *testing.T) {
 
 func TestFoodTrucksGetSingle(t *testing.T) {
 	tests.ClearDB()
+
 	foodTruck := models.JSONFoodTruck{
 		ID: "test",
 	}
@@ -56,6 +58,7 @@ func TestFoodTrucksGetSingle(t *testing.T) {
 
 func TestFoodTruckGetInvalid(t *testing.T) {
 	tests.ClearDB()
+
 	req, _ := http.NewRequest("GET", "/foodtruck", nil)
 	vars := map[string]string{
 		"foodTruckID": "invalid-id",
@@ -164,7 +167,7 @@ func TestFoodTrucksGetSearchMultipleValid(t *testing.T) {
 	}
 }
 
-func TestPostFoodTruckValid(t *testing.T) {
+func TestFoodTrucksPostValid(t *testing.T) {
 	tests.ClearDB()
 
 	name := "Luke's Coffee House"
@@ -192,7 +195,7 @@ func TestPostFoodTruckValid(t *testing.T) {
 	newFoodTruckTest := addFoodTruckRequest{
 		Name:        &name,
 		Address:     &address,
-		Location:    location,
+		Location:    &location,
 		Hours:       &hours,
 		Photos:      &photos,
 		Website:     website,
@@ -209,7 +212,7 @@ func TestPostFoodTruckValid(t *testing.T) {
 
 	expected := http.StatusOK
 	if rr.Code != expected {
-		t.Errorf("adding food truck expected status code of %v, but got %v", expected, rr.Code)
+		t.Errorf("adding valid food truck expected status code of %v, but got %v", expected, rr.Code)
 	}
 
 	var addedFoodTruck models.JSONReview
@@ -221,7 +224,7 @@ func TestPostFoodTruckValid(t *testing.T) {
 	}
 }
 
-func TestPostFoodTruckInvalidHours(t *testing.T) {
+func TestFoodTrucksPostInvalidHours(t *testing.T) {
 	tests.ClearDB()
 
 	name := "Luke's Coffee House"
@@ -249,7 +252,7 @@ func TestPostFoodTruckInvalidHours(t *testing.T) {
 	newFoodTruckTest := addFoodTruckRequest{
 		Name:        &name,
 		Address:     &address,
-		Location:    location,
+		Location:    &location,
 		Hours:       &hours,
 		Photos:      &photos,
 		Website:     website,
@@ -266,12 +269,46 @@ func TestPostFoodTruckInvalidHours(t *testing.T) {
 
 	expected := http.StatusBadRequest
 	if rr.Code != expected {
-		t.Errorf("adding food truck expected status code of %v, but got %v", expected, rr.Code)
+		t.Errorf("adding food truck with invalid hours expected status code of %v, but got %v", expected, rr.Code)
 	}
 
 }
 
-func TestPostFoodTruckNoPhotos(t *testing.T) {
+func TestFoodTrucksPostUnauthorized(t *testing.T) {
+	tests.ClearDB()
+
+	foodTruckRequest := addFoodTruckRequest{}
+	body, _ := json.Marshal(foodTruckRequest)
+
+	req, _ := http.NewRequest("POST", "/foodtrucks", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PostFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusUnauthorized
+	if rr.Code != expected {
+		t.Errorf("adding food truck while unauthorized expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestFoodTrucksPostInvalid(t *testing.T) {
+	tests.ClearDB()
+
+	foodTruckRequest := addFoodTruckRequest{}
+	body, _ := json.Marshal(foodTruckRequest)
+
+	req, _ := http.NewRequest("POST", "/foodtrucks", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostFoodTrucksHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("adding invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestFoodTrucksPostNoPhotos(t *testing.T) {
 	tests.ClearDB()
 
 	name := "Luke's Coffee House"
@@ -294,7 +331,7 @@ func TestPostFoodTruckNoPhotos(t *testing.T) {
 	newFoodTruckTest := addFoodTruckRequest{
 		Name:        &name,
 		Address:     &address,
-		Location:    location,
+		Location:    &location,
 		Hours:       &hours,
 		Website:     website,
 		PhoneNumber: phone,
@@ -310,7 +347,42 @@ func TestPostFoodTruckNoPhotos(t *testing.T) {
 
 	expected := http.StatusBadRequest
 	if rr.Code != expected {
-		t.Errorf("adding food truck expected status code of %v, but got %v", expected, rr.Code)
+		t.Errorf("adding food truck with no photos expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestFoodTrucksPostValidMinimum(t *testing.T) {
+	tests.ClearDB()
+
+	name := "test cafe"
+	address := "1 direction st"
+	location := [2]float64{0, 0}
+	hours := [7][2]string{[2]string{"10:00", "10:00"}, [2]string{"10:00", "10:00"}, [2]string{"10:00", "10:00"}, [2]string{"10:00", "10:00"}, [2]string{"10:00", "10:00"}, [2]string{"10:00", "10:00"}, [2]string{"10:00", "10:00"}}
+	photos := []string{"fake-url.com/image.png"}
+	foodTruckRequest := addFoodTruckRequest{
+		Name:     &name,
+		Address:  &address,
+		Location: &location,
+		Hours:    &hours,
+		Photos:   &photos,
+	}
+	body, _ := json.Marshal(foodTruckRequest)
+
+	req, _ := http.NewRequest("POST", "/foodtrucks", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostFoodTrucksHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusOK
+	if rr.Code != expected {
+		t.Errorf("adding valid food truck expected status code of %v, but got %v", expected, rr.Code)
 	}
 
+	var foodTruck models.JSONFoodTruck
+	json.NewDecoder(rr.Body).Decode(&foodTruck)
+
+	addedFoodTruck := tests.GetFoodTruck(foodTruck.ID)
+	if addedFoodTruck == nil || addedFoodTruck.Name != name || addedFoodTruck.Address != address {
+		t.Error("adding valid food truck expected food truck in db")
+	}
 }
