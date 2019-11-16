@@ -13,6 +13,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type invalidRequestBody struct {
+	InvalidField string `json:"invalidField"`
+}
+
 func TestMain(m *testing.M) {
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(secrets.GetMongoURI()))
