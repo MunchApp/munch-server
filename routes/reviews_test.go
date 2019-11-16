@@ -222,6 +222,23 @@ func TestReviewsPostInvalidRequestScraper(t *testing.T) {
 	}
 }
 
+func TestReviewsPostInvalidBody(t *testing.T) {
+	tests.ClearDB()
+
+	reviewsRequest := invalidRequestBody{}
+	body, _ := json.Marshal(reviewsRequest)
+
+	req, _ := http.NewRequest("POST", "/reviews", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostReviewsHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid body expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
 func TestReviewsPostInvalidFoodTruck(t *testing.T) {
 	tests.ClearDB()
 
@@ -383,14 +400,14 @@ func TestReviewsPostNewRating(t *testing.T) {
 	}
 }
 
-func TestGetReviewWithID(t *testing.T) {
+func TestReviewGet(t *testing.T) {
 	tests.ClearDB()
 
 	// Add sample review to DB
 	tests.AddReview(models.JSONReview{
 		ID: "test",
 	})
-	req, _ := http.NewRequest("GET", "/review", nil)
+	req, _ := http.NewRequest("GET", "/reviews", nil)
 	vars := map[string]string{
 		"reviewID": "test",
 	}
@@ -408,6 +425,25 @@ func TestGetReviewWithID(t *testing.T) {
 	json.NewDecoder(rr.Body).Decode(&review)
 	if review.ID != "test" {
 		t.Errorf("expected review with id test, but got %v", review.ID)
+	}
+
+}
+
+func TestReviewGetNoID(t *testing.T) {
+	tests.ClearDB()
+
+	// Add sample review to DB
+	tests.AddReview(models.JSONReview{
+		ID: "test",
+	})
+	req, _ := http.NewRequest("GET", "/reviews", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetReviewHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("getting single review expected status code of %v, but got %v", expected, rr.Code)
 	}
 
 }

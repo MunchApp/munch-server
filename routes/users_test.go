@@ -42,6 +42,24 @@ func TestLoginPostInvalidCredentials(t *testing.T) {
 	}
 }
 
+func TestLoginPostInvalidBody(t *testing.T) {
+	tests.ClearDB()
+
+	loginBody := invalidRequestBody{}
+	body, _ := json.Marshal(loginBody)
+	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PostLoginHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("login with invalid request expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
 func TestLoginPostInvalidRequest(t *testing.T) {
 	tests.ClearDB()
 
@@ -166,6 +184,26 @@ func TestRegisterPostValid(t *testing.T) {
 	}
 
 	// TODO: Add check for id returned
+}
+
+func TestRegisterPostInvalidBody(t *testing.T) {
+	tests.ClearDB()
+
+	// Create request body
+	registerBody := invalidRequestBody{}
+	body, _ := json.Marshal(registerBody)
+
+	req, _ := http.NewRequest("POST", "/register", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PostRegisterHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("register with invalid body expected status code of %v, but got %v", expected, rr.Code)
+	}
 }
 
 func TestRegisterPostInvalid(t *testing.T) {
@@ -328,7 +366,7 @@ func TestUserGetValidID(t *testing.T) {
 	}
 }
 
-func TestValidUpdateUserRequest(t *testing.T) {
+func TestProfilePutValid(t *testing.T) {
 	tests.ClearDB()
 	dob, _ := time.Parse(time.RFC3339, "1969-04-20T05:00:00.000Z")
 	user := models.JSONUser{
@@ -388,4 +426,38 @@ func TestValidUpdateUserRequest(t *testing.T) {
 		t.Errorf("expected updated user with date of birth '09/07/1967', but got %v", updatedUser.DateOfBirth)
 	}
 
+}
+
+func TestProfilePutInvalidBody(t *testing.T) {
+	tests.ClearDB()
+
+	updateProfileRequest := invalidRequestBody{}
+	body, _ := json.Marshal(updateProfileRequest)
+
+	req, _ := http.NewRequest("PUT", "/profile", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutUpdateProfileHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("adding review with invalid body expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestProfilePutUnauthorized(t *testing.T) {
+	tests.ClearDB()
+
+	updateProfileRequest := invalidRequestBody{}
+	body, _ := json.Marshal(updateProfileRequest)
+
+	req, _ := http.NewRequest("PUT", "/profile", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(PutUpdateProfileHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusUnauthorized
+	if rr.Code != expected {
+		t.Errorf("adding review while unauthorized expected status code of %v, but got %v", expected, rr.Code)
+	}
 }

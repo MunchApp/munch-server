@@ -69,7 +69,7 @@ func TestFoodTrucksGetInvalidLat(t *testing.T) {
 
 	expected := http.StatusBadRequest
 	if rr.Code != expected {
-		t.Errorf("getting all food trucks expected status code of %v, but got %v", expected, rr.Code)
+		t.Errorf("getting all food trucks with invalid latitude expected status code of %v, but got %v", expected, rr.Code)
 	}
 }
 
@@ -83,7 +83,21 @@ func TestFoodTrucksGetInvalidLon(t *testing.T) {
 
 	expected := http.StatusBadRequest
 	if rr.Code != expected {
-		t.Errorf("getting all food trucks expected status code of %v, but got %v", expected, rr.Code)
+		t.Errorf("getting all food trucks with invalid longitude expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
+func TestFoodTrucksGetInvalidLatLon(t *testing.T) {
+	tests.ClearDB()
+
+	req, _ := http.NewRequest("GET", "/foodtrucks?lat=-97.735592&lon=30.288441", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTrucksHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("getting all food trucks with invalid location expected status code of %v, but got %v", expected, rr.Code)
 	}
 }
 
@@ -164,6 +178,21 @@ func TestFoodTrucksGetSortOrder(t *testing.T) {
 		t.Errorf("expected third food truck to be 26th, but got %v", foodTrucks[2].Name)
 	}
 }
+
+func TestFoodTruckGetNoID(t *testing.T) {
+	tests.ClearDB()
+
+	req, _ := http.NewRequest("GET", "/foodtruck", nil)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetFoodTruckHandler)
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("getting no food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
 func TestFoodTruckGetInvalid(t *testing.T) {
 	tests.ClearDB()
 
@@ -404,6 +433,23 @@ func TestFoodTrucksPostUnauthorized(t *testing.T) {
 	}
 }
 
+func TestFoodTrucksPostInvalidBody(t *testing.T) {
+	tests.ClearDB()
+
+	foodTruckRequest := invalidRequestBody{}
+	body, _ := json.Marshal(foodTruckRequest)
+
+	req, _ := http.NewRequest("POST", "/foodtrucks", bytes.NewBuffer(body))
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PostFoodTrucksHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("adding invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
 func TestFoodTrucksPostInvalid(t *testing.T) {
 	tests.ClearDB()
 
@@ -502,7 +548,7 @@ func TestFoodTrucksPostValidMinimum(t *testing.T) {
 func TestClaimFoodTruckPutUnauthorized(t *testing.T) {
 	tests.ClearDB()
 
-	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
 	vars := map[string]string{
 		"foodTruckID": "test",
 	}
@@ -517,10 +563,24 @@ func TestClaimFoodTruckPutUnauthorized(t *testing.T) {
 	}
 }
 
+func TestClaimFoodTruckPutNoFoodTruck(t *testing.T) {
+	tests.ClearDB()
+
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
+	rr := httptest.NewRecorder()
+	handler := tests.AuthenticateMockUser(http.HandlerFunc(PutClaimFoodTruckHandler))
+	handler.ServeHTTP(rr, req)
+
+	expected := http.StatusBadRequest
+	if rr.Code != expected {
+		t.Errorf("claiming an invalid food truck expected status code of %v, but got %v", expected, rr.Code)
+	}
+}
+
 func TestClaimFoodTruckPutInvalidFoodTruck(t *testing.T) {
 	tests.ClearDB()
 
-	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
 	vars := map[string]string{
 		"foodTruckID": "test",
 	}
@@ -546,7 +606,7 @@ func TestClaimFoodTruckPutValid(t *testing.T) {
 		ID: "testfoodtruck",
 	})
 
-	req, _ := http.NewRequest("PUT", "/foodtruck", nil)
+	req, _ := http.NewRequest("PUT", "/foodtrucks/claim", nil)
 	vars := map[string]string{
 		"foodTruckID": "testfoodtruck",
 	}

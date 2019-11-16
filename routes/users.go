@@ -72,12 +72,7 @@ func PostRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*newUser.Password), bcrypt.DefaultCost)
 
 	// Generate a random uuidv4
-	uuid, err := uuid.NewRandom()
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	uuid, _ := uuid.NewRandom()
 
 	// Create and insert user into database
 	registeredUser := models.JSONUser{
@@ -147,12 +142,7 @@ func PostLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	jwtSecret, _ := secrets.GetJWTSecret(nil)
-	jwtString, err := token.SignedString(jwtSecret)
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	jwtString, _ := token.SignedString(jwtSecret)
 
 	// Send response
 	w.Header().Set("Content-Type", "application/json")

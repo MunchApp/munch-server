@@ -94,18 +94,8 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate hours
 	for i := 0; i < 7; i++ {
-		validOpenTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, newFoodTruck.Hours[i][0])
-		if err != nil {
-			log.Printf("ERROR: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		validCloseTime, err := regexp.MatchString(`^\d{2}:\d{2}$`, newFoodTruck.Hours[i][1])
-		if err != nil {
-			log.Printf("ERROR: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		validOpenTime, _ := regexp.MatchString(`^\d{2}:\d{2}$`, newFoodTruck.Hours[i][0])
+		validCloseTime, _ := regexp.MatchString(`^\d{2}:\d{2}$`, newFoodTruck.Hours[i][1])
 		if !validOpenTime || !validCloseTime {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -113,12 +103,7 @@ func PostFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate uuid for food truck
-	uuid, err := uuid.NewRandom()
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	uuid, _ := uuid.NewRandom()
 
 	// Set tags to an empty array if they don't exist
 	tags := newFoodTruck.Tags
@@ -260,7 +245,7 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 		cur, err = foodTrucksCollection.Aggregate(r.Context(), mongo.Pipeline{geoStage})
 		if err != nil {
 			log.Printf("ERROR: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	} else {
