@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 	"munchserver/dbutils"
@@ -480,7 +481,7 @@ func PutFoodTruckUploadHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := Uploader.UploadWithContext(r.Context(), &s3manager.UploadInput{
 		Bucket: aws.String("munch-assets"),
 		Key:    aws.String(filename),
-		Body:   file,
+		Body:   bytes.NewReader(buffer),
 	})
 	if err != nil {
 		log.Printf("ERROR: %v", err)
