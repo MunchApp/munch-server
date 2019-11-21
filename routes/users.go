@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 	"munchserver/dbutils"
@@ -83,12 +84,7 @@ func PutProfileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	file.Read(buffer)
 
 	// Generate a random uuidv4
-	uuid, err := uuid.NewRandom()
-	if err != nil {
-		log.Printf("ERROR: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	uuid, _ := uuid.NewRandom()
 
 	// Create file name for image
 	filename := uuid.String() + filepath.Ext(fileHeader.Filename)
@@ -97,7 +93,7 @@ func PutProfileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := Uploader.UploadWithContext(r.Context(), &s3manager.UploadInput{
 		Bucket: aws.String("munch-assets"),
 		Key:    aws.String(filename),
-		Body:   file,
+		Body:   bytes.NewReader(buffer),
 	})
 	if err != nil {
 		log.Printf("ERROR: %v", err)
