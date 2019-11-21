@@ -35,6 +35,7 @@ func main() {
 	// Auth required routes
 	router.Use(middleware.AuthenticateUser)
 	router.HandleFunc("/profile", routes.GetProfileHandler).Methods("GET")
+	router.HandleFunc("/profile/upload", routes.PutProfileUploadHandler).Methods("PUT")
 	router.HandleFunc("/foodtrucks", routes.PostFoodTrucksHandler).Methods("POST")
 	router.HandleFunc("/foodtrucks/claim/{foodTruckID}", routes.PutClaimFoodTruckHandler).Methods("PUT")
 	router.HandleFunc("/foodtrucks/upload/{foodTruckID}", routes.PutFoodTruckUploadHandler).Methods("PUT")
@@ -65,6 +66,10 @@ func main() {
 			secrets.GetAWSSecretAccessKey(), // secret
 			""),                             // token can be left blank for now
 	})
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+	}
+
 	routes.Uploader = s3manager.NewUploader(sess)
 
 	// Setup db indexes

@@ -10,6 +10,7 @@ type JSONUser struct {
 	NameFirst       string    `json:"firstName" bson:"firstName"`
 	NameLast        string    `json:"lastName" bson:"lastName"`
 	Email           string    `json:"email" bson:"email"`
+	Picture         string    `json:"picture" bson:"picture"`
 	PhoneNumber     string    `json:"phoneNumber" bson:"phoneNumber"`
 	City            string    `json:"city" bson:"city"`
 	State           string    `json:"state" bson:"state"`
