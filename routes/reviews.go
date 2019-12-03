@@ -18,7 +18,7 @@ type newReviewRequest struct {
 	ReviewerName string    `json:"reviewerName"`
 	FoodTruck    *string   `json:"foodTruck"`
 	Comment      string    `json:"comment"`
-	Rating       *float32  `json:"rating"`
+	Rating       *float64  `json:"rating"`
 	Date         time.Time `json:"date"`
 	Origin       string    `json:"origin"`
 }
@@ -61,8 +61,8 @@ func PostReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Calculate rating sum to determine new avg rating, the new avg rating will be (that sum + review's rating) / new number of reviews
-	ratingSum := float32(len(foodTruck.Reviews)) * foodTruck.AvgRating
-	newAvgRating := (ratingSum + *newReview.Rating) / float32(len(foodTruck.Reviews)+1)
+	ratingSum := float64(len(foodTruck.Reviews)) * foodTruck.AvgRating
+	newAvgRating := (ratingSum + *newReview.Rating) / float64(len(foodTruck.Reviews)+1)
 
 	// Generate uuid for review
 	uuid, _ := uuid.NewRandom()

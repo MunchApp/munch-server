@@ -4,7 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func UpdateFoodTruckWithReview(avgRating float32, reviewID string) bson.M {
+func UpdateFoodTruckWithReview(avgRating float64, reviewID string) bson.M {
 	return bson.M{"$set": bson.M{"avgRating": avgRating}, "$push": bson.M{"reviews": reviewID}}
 }
 

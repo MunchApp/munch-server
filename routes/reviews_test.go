@@ -242,7 +242,7 @@ func TestReviewsPostInvalidBody(t *testing.T) {
 func TestReviewsPostInvalidFoodTruck(t *testing.T) {
 	tests.ClearDB()
 
-	var rating float32 = 5.0
+	var rating float64 = 5.0
 	name := "invalid-truck"
 	reviewsRequest := newReviewRequest{
 		FoodTruck: &name,
@@ -275,7 +275,7 @@ func TestReviewsPostValidClient(t *testing.T) {
 		Reviews: []string{},
 	})
 
-	var rating float32 = 5.0
+	var rating float64 = 5.0
 	name := "testfoodtruck"
 	reviewsRequest := newReviewRequest{
 		FoodTruck: &name,
@@ -323,7 +323,7 @@ func TestReviewsPostValidScraper(t *testing.T) {
 		ID:      "testfoodtruck",
 		Reviews: []string{},
 	})
-	var rating float32 = 5.0
+	var rating float64 = 5.0
 	name := "testfoodtruck"
 	reviewsRequest := newReviewRequest{
 		ReviewerName: "Test User",
@@ -372,7 +372,7 @@ func TestReviewsPostNewRating(t *testing.T) {
 		Reviews: []string{},
 	})
 
-	var rating float32 = 5.0
+	var rating float64 = 5.0
 	name := "testfoodtruck"
 	reviewsRequest := newReviewRequest{
 		FoodTruck: &name,

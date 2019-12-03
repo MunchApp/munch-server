@@ -53,7 +53,7 @@ type foodTruckWithDistance struct {
 	Location    [2]float64   `json:"location" bson:"location"`
 	Owner       string       `json:"owner" bson:"owner"`
 	Status      bool         `json:"status" bson:"status"`
-	AvgRating   float32      `json:"avgRating" bson:"avgRating"`
+	AvgRating   float64      `json:"avgRating" bson:"avgRating"`
 	Hours       [7][2]string `json:"hours" bson:"hours"`
 	Reviews     []string     `json:"reviews" bson:"reviews"`
 	Photos      []string     `json:"photos" bson:"photos"`
@@ -266,7 +266,12 @@ func GetFoodTrucksHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get users from cursor, convert to empty slice if no users in DB
 	var foodTrucks []foodTruckWithDistance
-	cur.All(r.Context(), &foodTrucks)
+	err = cur.All(r.Context(), &foodTrucks)
+	if err != nil {
+		log.Printf("ERROR: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if foodTrucks == nil {
 		foodTrucks = make([]foodTruckWithDistance, 0)
 	}
