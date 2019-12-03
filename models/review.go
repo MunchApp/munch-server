@@ -10,7 +10,7 @@ type JSONReview struct {
 	ReviewerName string    `json:"reviewerName" bson:"reviewerName"`
 	FoodTruck    string    `json:"foodTruck" bson:"foodTruck"`
 	Comment      string    `json:"comment" bson:"comment"`
-	Rating       float32   `json:"rating" bson:"rating"`
+	Rating       float64   `json:"rating" bson:"rating"`
 	Date         time.Time `json:"date" bson:"date"`
 	Origin       string    `json:"origin" bson:"origin"`
 }
